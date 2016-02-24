@@ -165,6 +165,7 @@ class TstatParse(TstatBase):
             tcp=TcpLogEntryCapsule,
             udp=UdbLogEntryCapsule,
         )
+        self._transport = TRANSPORT_MAP.get(self._options.transport)(self._config)
 
     def _fix_path(self, path, *args):  # pylint: disable=no-self-use
         """normalize and absolute-ize a path or set of path components"""
@@ -318,10 +319,8 @@ class TstatParse(TstatBase):
         err = ''
 
         try:
-            xport = TRANSPORT_MAP.get(self._options.transport)(self._config)
-
-            xport.set_payload(p_load)
-            xport.send()
+            self._transport.set_payload(p_load)
+            self._transport.send()
 
             # print p_load
         except TstatTransportException as ex:

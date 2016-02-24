@@ -29,7 +29,7 @@ setup(
     scripts=[
         'bin/tstat_send',
     ],
-    install_requires=[],
+    install_requires=['pika==0.10.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

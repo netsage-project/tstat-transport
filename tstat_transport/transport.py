@@ -4,6 +4,8 @@ Classes to handle the sending of the json-formatted by the appropriate transport
 
 import warnings
 
+import pika
+
 from .common import (
     TstatBase,
     TstatConfigException,
