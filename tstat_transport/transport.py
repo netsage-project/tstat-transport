@@ -30,7 +30,7 @@ class BaseTransport(TstatBase):
         super(BaseTransport, self).__init__(config_capsule)
 
         self._host = self._config.get_cfg_val('host')
-        self._port = self._config.get_cfg_val('port')
+        self._port = self._config.get_cfg_val('port', as_int=True)
 
         # Initialize user/pass from ini file if transport needs it.
         if init_user_pass:
@@ -79,11 +79,39 @@ class RabbitMQTransport(BaseTransport):
     def __init__(self, config_capsule):
         super(RabbitMQTransport, self).__init__(config_capsule, init_user_pass=True)
 
-        self._vhost = self._safe_cfg_val('vhost')
-        self._queue = self._safe_cfg_val('queue')
         self._use_ssl = self._safe_cfg_val('use_ssl', as_bool=True)
+        self._connect_info = self._connection_params()
 
-        print self.__dict__
+        self._queue = self._safe_cfg_val('queue')
+
+    def _connection_params(self):
+        """Generate pika connection parameters object/options."""
+
+        credentials = pika.PlainCredentials(self._username, self._password)
+
+        params = pika.ConnectionParameters(
+            host=self._host,
+            port=self._port,
+            virtual_host=self._safe_cfg_val('vhost'),
+            credentials=credentials,
+            ssl=self._use_ssl,
+            ssl_options=self._ssl_opts(),
+            )
+
+        self._verbose_log('_connection_params.end', params)
+
+        return params
+
+    def _ssl_opts(self):
+        """Genearte ssl_options for the connection if need be."""
+        opts = dict()
+
+        if self._use_ssl:
+            opts['keyfile'] = 'mykey.pem'
+            opts['certfile'] = 'mycert.pem'
+            self._verbose_log('_ssl_opts.done', 'using opts: {0}'.format(opts))
+
+        return opts
 
     def send(self):
         print 'XXX', self._port, self._host
