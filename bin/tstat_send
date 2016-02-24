@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+"""
+Client script to walk through a tstat log hierarchy, send new data off to be
+archived, and mark data as processed.
+"""
+
+import os
+from optparse import OptionParser
+
+from tstat_transport.parse import TstatParse
+from tstat_transport.util import GracefulInterruptHandler, _log
+from tstat_transport.transport import TRANSPORT_TYPE, TRANSPORT_DEFAULT
+from tstat_transport.common import (
+    ConfigurationCapsule,
+    TstatConfigException,
+    TstatParseException,
+)
+
+
+def main():
+    """Execute the walk."""
+
+    usage = '%prog [ -d DIR | -v ]'
+    parser = OptionParser(usage=usage)
+    parser.add_option('-d', '--directory', metavar='DIR',
+                      type='string', dest='directory',
+                      help='Root directory where tstat files are.')
+    parser.add_option('-s', '--single',
+                      dest='single', action='store_true', default=False,
+                      help='Only process a single log file - primarily for development.')
+    parser.add_option('-b', '--bytes', metavar='NUM',
+                      type='int', dest='bytes', default=25000000000,
+                      help='Threshold in bytes below which an entry will not be processed.')
+    parser.add_option('-t', '--transport', metavar='TYPE',
+                      type='string', dest='transport', default=TRANSPORT_DEFAULT,
+                      help='Transport type - available: [{0}] (default: %default).'.format('|'.join(TRANSPORT_TYPE)))  # pylint: disable=line-too-long
+    parser.add_option('-c', '--config', metavar='FILE',
+                      type='string', dest='config', default='./config.ini',
+                      help='Path to the transport config file (default: %default).')
+    parser.add_option('-v', '--verbose',
+                      dest='verbose', action='store_true', default=False,
+                      help='Verbose output.')
+    options, _ = parser.parse_args()
+
+    if not options.directory:
+        parser.error('Directory path is required.')
+
+    dir_path = os.path.normpath(options.directory)
+
+    if not os.path.exists(dir_path):
+        parser.error('{f} directory path does not exist'.format(f=dir_path))
+
+    config_path = os.path.abspath(options.config)
+
+    if not os.path.exists(config_path):
+        parser.error('{f} config file does not exist'.format(f=config_path))
+
+    if options.transport not in TRANSPORT_TYPE:
+        parser.error('{t} is not a valid transport type.'.format(t=options.transport))
+
+    try:
+        config_capsule = ConfigurationCapsule(options, _log, config_path)
+    except TstatConfigException as ex:
+        _log('main.error', 'config exception, exiting: {0}'.format(str(ex)))
+        return -1
+
+    try:
+        twalk = TstatParse(config_capsule)
+    except TstatParseException as ex:
+        _log('main.error', 'TstatParser setup caught: {0}'.format(str(ex)))
+        return -1
+
+    with GracefulInterruptHandler() as handler:
+        for root, dirs, files in os.walk(options.directory):
+            try:
+                twalk.process_output(root, dirs, files)
+            except TstatParseException as ex:
+                _log('main.error', 'processing error, exiting: {0}'.format(str(ex)))
+                return -1
+
+            if handler.interrupted or (options.single and twalk.has_data):
+                _log('main.exit', 'interrupted or --single option used - exiting.')
+                break
+
+if __name__ == '__main__':
+    main()
