@@ -41,6 +41,11 @@ class BaseTransport(TstatBase):
 
         self._payload = None
 
+        # Flip on logging.DEBUG to diagnose issues with the
+        # transport subclasses (rabbit connection issues, etc).
+        if self._options.debug:
+            logging.basicConfig(level=logging.DEBUG)
+
     def _safe_cfg_val(self, value, **kwargs):
         """
         Call in subclasses to get transport specific config values
@@ -87,11 +92,13 @@ class RabbitMQTransport(BaseTransport):
         self._use_ssl = self._safe_cfg_val('use_ssl', as_bool=True)
         self._connect_info = self._connection_params()
 
+        # Retrieve these values before setting everything up to
+        # allow any configuration errors to be raised first.
         self._queue = self._safe_cfg_val('queue')
+        self._exchange = self._safe_cfg_val('exchange')
+        self._routing_key = self._safe_cfg_val('routing_key')
 
         try:
-            if self._options.debug:
-                logging.basicConfig(level=logging.DEBUG)
             self._connection = PikaConnection(self._connect_info)
         except pika.exceptions.ConnectionClosed:
             msg = 'unable to connect to rabbit at: {0}'.format(self._connect_info)
@@ -135,8 +142,23 @@ class RabbitMQTransport(BaseTransport):
     def send(self):
         """Send the payload to the remote server."""
 
+        self._verbose_log('rabbit.send', 'publishing message')
+
         if self._connection.is_open:
-            print 'XXX', self._port, self._host
+            if self._channel.basic_publish(
+                    exchange=self._exchange,
+                    routing_key=self._routing_key,
+                    body=self._payload,
+                    properties=pika.BasicProperties(
+                        content_type='application/json',
+                        delivery_mode=1,
+                    )
+            ):
+                self._log('rabbit.send', 'basic_publish success')
+            else:
+                msg = 'could not confirm publish success'
+                self._log('rabbit.send.error', msg)
+                raise TstatTransportException(msg)
         else:
             msg = 'rabbit mq connection is no longer open - send failed.'
             self._log('rabbit.send.error', msg)

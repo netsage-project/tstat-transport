@@ -140,9 +140,6 @@ class ConfigurationCapsule(object):
     def get_rabbit_queue_opts(self):
         return self._config_stanza_to_dict('rabbit_queue_options')
 
-    def get_rabbit_publish_opts(self):
-        return self._config_stanza_to_dict('rabbit_publish_options')
-
     # expose the internals as properties.
 
     @property

@@ -245,7 +245,7 @@ class TstatParse(TstatBase):
 
         # has this directory been processed already?
         if self._get_state(log_path) is None:
-            self._debug_log('process_output.done', 'skipping: {0}'.format(log_path))
+            # self._debug_log('process_output.done', 'skipping: {0}'.format(log_path))
             return
 
         # try to process both logs
