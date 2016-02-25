@@ -41,6 +41,9 @@ def main():
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='store_true', default=False,
                       help='Verbose output.')
+    parser.add_option('-D', '--debug',
+                      dest='debug', action='store_true', default=False,
+                      help='Extra verbose output/connection debugging/etc.')
     options, _ = parser.parse_args()
 
     if not options.directory:

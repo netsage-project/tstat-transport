@@ -2,9 +2,11 @@
 Classes to handle the sending of the json-formatted by the appropriate transport layers.
 """
 
+import logging
 import warnings
 
 import pika
+from pika.adapters.blocking_connection import BlockingConnection as PikaConnection
 
 from .common import (
     TstatBase,
@@ -75,12 +77,27 @@ class BaseTransport(TstatBase):
 class RabbitMQTransport(BaseTransport):
     """
     Class to send JSON payload to a RabbitMQ server.
+
+    If connection requires special ssl_options, these can be set in the
+    optional [ssl_options] stanza in the configuration file.
     """
     def __init__(self, config_capsule):
         super(RabbitMQTransport, self).__init__(config_capsule, init_user_pass=True)
 
         self._use_ssl = self._safe_cfg_val('use_ssl', as_bool=True)
         self._connect_info = self._connection_params()
+
+        try:
+            if self._options.debug:
+                logging.basicConfig(level=logging.DEBUG)
+            self._connection = PikaConnection(self._connect_info)
+        except pika.exceptions.ConnectionClosed:
+            msg = 'unable to connect to rabbit at: {0}'.format(self._connect_info)
+            msg += ' - retry with --debug flag to see verbose connection output'
+            self._log('rabbit.init.error', msg)
+            raise TstatTransportException(msg)
+
+        self._log('rabbit.init.connection', 'state - is_open: {0}'.format(self._connection.is_open))
 
         self._queue = self._safe_cfg_val('queue')
 
@@ -95,23 +112,12 @@ class RabbitMQTransport(BaseTransport):
             virtual_host=self._safe_cfg_val('vhost'),
             credentials=credentials,
             ssl=self._use_ssl,
-            ssl_options=self._ssl_opts(),
+            ssl_options=self._config.get_ssl_opts(),
             )
 
         self._verbose_log('_connection_params.end', params)
 
         return params
-
-    def _ssl_opts(self):
-        """Genearte ssl_options for the connection if need be."""
-        opts = dict()
-
-        if self._use_ssl:
-            opts['keyfile'] = 'mykey.pem'
-            opts['certfile'] = 'mycert.pem'
-            self._verbose_log('_ssl_opts.done', 'using opts: {0}'.format(opts))
-
-        return opts
 
     def send(self):
         print 'XXX', self._port, self._host

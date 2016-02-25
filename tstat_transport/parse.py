@@ -165,7 +165,13 @@ class TstatParse(TstatBase):
             tcp=TcpLogEntryCapsule,
             udp=UdbLogEntryCapsule,
         )
-        self._transport = TRANSPORT_MAP.get(self._options.transport)(self._config)
+
+        try:
+            self._transport = TRANSPORT_MAP.get(self._options.transport)(self._config)
+        except TstatTransportException as ex:
+            msg = 'unable to initialize {t} adapter: {e}'.format(
+                t=self._options.transport, e=str(ex))
+            raise TstatParseException(msg)
 
     def _fix_path(self, path, *args):  # pylint: disable=no-self-use
         """normalize and absolute-ize a path or set of path components"""
@@ -239,7 +245,7 @@ class TstatParse(TstatBase):
 
         # has this directory been processed already?
         if self._get_state(log_path) is None:
-            self._verbose_log('process_output.done', 'skipping: {0}'.format(log_path))
+            self._debug_log('process_output.done', 'skipping: {0}'.format(log_path))
             return
 
         # try to process both logs

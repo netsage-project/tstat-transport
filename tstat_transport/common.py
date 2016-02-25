@@ -31,6 +31,11 @@ class TstatBase(object):  # pylint: disable=too-few-public-methods
         if self._options.verbose:
             self._log(event, msg)
 
+    def _debug_log(self, event, msg):
+        """Log events if running in verbose mode."""
+        if self._options.debug:
+            self._log(event, msg)
+
 
 class TstatConfigException(Exception):
     """Custom TstatConfig exception"""
@@ -114,6 +119,19 @@ class ConfigurationCapsule(object):
         except ValueError:
             msg = '{0} config value improper type'.format(value)
             raise TstatConfigException(msg)
+
+    def get_ssl_opts(self):
+        opts = dict()
+
+        stanza = 'ssl_options'
+
+        if stanza in self.config.sections() and len(self.config.options(stanza)):
+            for i in self.config.options(stanza):
+                opts[i] = self.config.get(stanza, i)
+            self._log('get_ssl_opts',
+                      'initializing connection with ssl_options: {0}'.format(opts))
+
+        return opts
 
     @property
     def options(self):
