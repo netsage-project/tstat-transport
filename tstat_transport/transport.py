@@ -87,6 +87,8 @@ class RabbitMQTransport(BaseTransport):
         self._use_ssl = self._safe_cfg_val('use_ssl', as_bool=True)
         self._connect_info = self._connection_params()
 
+        self._queue = self._safe_cfg_val('queue')
+
         try:
             if self._options.debug:
                 logging.basicConfig(level=logging.DEBUG)
@@ -97,9 +99,20 @@ class RabbitMQTransport(BaseTransport):
             self._log('rabbit.init.error', msg)
             raise TstatTransportException(msg)
 
-        self._log('rabbit.init.connection', 'state - is_open: {0}'.format(self._connection.is_open))
+        if not self._connection.is_open:
+            msg = 'connection object successfully initialized, but no longer open.'
+            raise TstatTransportException(msg)
 
-        self._queue = self._safe_cfg_val('queue')
+        self._log('rabbit.init.connection', 'status - is_open: {0}'.format(
+            self._connection.is_open))
+
+        # now set up the channel
+        self._channel = self._connection.channel()
+        # just set the queue, presume other opts set on server.
+        self._channel.queue_declare(
+            queue=self._queue, **self._config.get_rabbit_queue_opts())
+        # we want message delivery confirmation
+        self._channel.confirm_delivery()
 
     def _connection_params(self):
         """Generate pika connection parameters object/options."""
@@ -120,7 +133,15 @@ class RabbitMQTransport(BaseTransport):
         return params
 
     def send(self):
-        print 'XXX', self._port, self._host
+        """Send the payload to the remote server."""
+
+        if self._connection.is_open:
+            print 'XXX', self._port, self._host
+        else:
+            msg = 'rabbit mq connection is no longer open - send failed.'
+            self._log('rabbit.send.error', msg)
+            raise TstatTransportException(msg)
+
 
 TRANSPORT_MAP = dict(
     rabbit=RabbitMQTransport,

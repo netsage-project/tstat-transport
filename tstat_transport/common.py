@@ -120,18 +120,30 @@ class ConfigurationCapsule(object):
             msg = '{0} config value improper type'.format(value)
             raise TstatConfigException(msg)
 
-    def get_ssl_opts(self):
+    def _config_stanza_to_dict(self, stanza):
         opts = dict()
-
-        stanza = 'ssl_options'
 
         if stanza in self.config.sections() and len(self.config.options(stanza)):
             for i in self.config.options(stanza):
                 opts[i] = self.config.get(stanza, i)
-            self._log('get_ssl_opts',
-                      'initializing connection with ssl_options: {0}'.format(opts))
+            self._log('_config_stanza_to_dict',
+                      'stanza [{s}] to dict: {d}'.format(s=stanza, d=opts))
 
         return opts
+
+    def get_ssl_opts(self):
+        return self._config_stanza_to_dict('ssl_options')
+
+    # Some rabbit specific option calls to pass addional kwargs to
+    # pika methods.
+
+    def get_rabbit_queue_opts(self):
+        return self._config_stanza_to_dict('rabbit_queue_options')
+
+    def get_rabbit_publish_opts(self):
+        return self._config_stanza_to_dict('rabbit_publish_options')
+
+    # expose the internals as properties.
 
     @property
     def options(self):
