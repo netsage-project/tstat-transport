@@ -20,7 +20,7 @@ When invoked, it crawls a tstat file hierarchy laid out like this:
 
 Selected data are extracted from the relevant logs, the data are formatted into JSON objects, and lists of JSON are sent to a remote server for archiving. All the objects from a single log are broken into a list of smaller lists (the current default is 100 objects per list). Each "sub-list" gets sent to the remote server so no one single send operation swamps the remote server.
 
-When the logs in each directory.
+When the logs in each directory have been successfully processed (all the data has been sent and delivery confirmations received), a dotfile named `.processed` will be dropped in that directory. This directory will not be processed on subsequent runs, and this could be used in conjunction with a find to set up cron jobs that will cull the older logs.
 
 Currently, the only "transport" that is supported is sending the JSON to a RabbitMQ server, but it would be relatively straightforward to implement other transports like using HTTP to send to a REST API.
 
