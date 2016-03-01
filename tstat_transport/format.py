@@ -211,16 +211,6 @@ class UdpCapsule(EntryCapsuleBase):
         return self.start + self.duration
 
 
-class InsufficientByteThresholdException(Exception):
-    """Custom InsufficientByteThreshold exception"""
-    def __init__(self, value):
-        # pylint: disable=super-init-not-called
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
 def capsule_factory(row, protocol, config):
     """Return the proper format capsule class."""
 
