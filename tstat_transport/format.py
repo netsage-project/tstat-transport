@@ -170,6 +170,11 @@ class TcpCapsule(EntryCapsuleBase):
         return '#09#'
 
     @property
+    def duration(self):
+        """get duration."""
+        return float(self._row.get('durat'))
+
+    @property
     def num_bits(self):
         """Get num_bits."""
         return int(self._direction_key('bytes_uniq')) * 8
@@ -178,11 +183,6 @@ class TcpCapsule(EntryCapsuleBase):
     def num_packets(self):
         """Get num_packets."""
         return self._direction_key('pkts_data')
-
-    @property
-    def duration(self):
-        """get duration."""
-        return float(self._row.get('durat'))
 
     @property
     def start(self):
@@ -203,6 +203,11 @@ class UdpCapsule(EntryCapsuleBase):
         return '#'
 
     @property
+    def duration(self):
+        """get duration."""
+        return float(self._direction_key('durat'))
+
+    @property
     def num_bits(self):
         """Get num_bits."""
         return int(self._direction_key('bytes_all')) * 8
@@ -211,11 +216,6 @@ class UdpCapsule(EntryCapsuleBase):
     def num_packets(self):
         """Get num_packets."""
         return self._direction_key('pkts_all')
-
-    @property
-    def duration(self):
-        """get duration."""
-        return float(self._direction_key('durat'))
 
     @property
     def start(self):
