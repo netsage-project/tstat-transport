@@ -6,6 +6,8 @@ import ConfigParser
 
 from .util import valid_hostname
 
+PROTOCOLS = ('tcp', 'udp')
+
 
 class TstatBase(object):  # pylint: disable=too-few-public-methods
     """

@@ -9,6 +9,7 @@ import os
 import warnings
 
 from .common import (
+    PROTOCOLS,
     TstatBase,
     TstatParseException,
     TstatParseWarning,
@@ -16,6 +17,7 @@ from .common import (
 )
 
 from .transport import TRANSPORT_MAP
+from .format import capsule_factory
 
 # These classes encapsulate and manipulate the data from the
 # tstat logs.
@@ -269,9 +271,7 @@ class TstatParse(TstatBase):
                             self.warn('bad row in {0}: {1}'.format(self._get_log(log_path, i), row))
                             continue
                         # looks good
-                        log_capsule = self._get_capsule(i)(row, i)
-                        if log_capsule.c_bytes_all >= self._options.bytes:
-                            payload.append(log_capsule)
+                        payload += capsule_factory(row, i, self._config)
 
         # try to process and mark that directory done if the
         # processing is successful
