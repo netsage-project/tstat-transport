@@ -45,6 +45,18 @@ class EntryCapsuleBase(object):
         """
         return self._row.get(key)
 
+    def _cast_to_numeric(self, val):  # pylint: disable=no-self-use
+        """Try to take the string values from the logs and cast them
+        to actual numeric types.
+
+        1 - try casting to int
+        2 - if fails, try casting to float
+        3 - if fails, return original value
+        """
+
+        if isinstance(val, str) or isinstance(val, unicode):
+            pass
+
     def _base_document(self):
         """Generate the general structure of the object."""
 
