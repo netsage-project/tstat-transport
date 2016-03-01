@@ -2,18 +2,6 @@
 Classes to format the log entries, code to access them, etc.
 
 Direction is relative to the host so - in and out from the host perspective.
-
-In the google doc meta stanza:
-
-in => source_ip would be 1
-    in will also correspond to the c_ variants.
-
-out => source_ip would be 15
-    out will also correspond to the s_ variants.
-
-check the num_bits fields to see if we should return.
-
-capsule_factory will return a list of 0, 1 or 2 objects.
 """
 
 import collections
@@ -42,12 +30,19 @@ class EntryCapsuleBase(object):
             row[k.replace(self.header_trim, '').split(':')[0]] = row.pop(k)
         return row
 
-    def _direction_key(self, key):
+    def _directional_key(self, key):
         """
         Returns the proper c_ or s_ variant from the row payload depending
         on the direction that this instance is going.
         """
         key = '{d}{k}'.format(d=self._prefixes.get(self._direction), k=key)
+        return self._row.get(key)
+
+    def _static_key(self, key):
+        """
+        Return a "non-directional" value from the payload. Used to contrast
+        against _directional_key() and to have one entry point for casting.
+        """
         return self._row.get(key)
 
     def _base_document(self):
@@ -83,6 +78,7 @@ class EntryCapsuleBase(object):
     def _meta_map(self):
         """
         Arrange the values in the meta stanza depending on the direction.
+        This is different than just using _directional_key().
         """
         if self._direction == 'in':
             return dict(
@@ -154,8 +150,8 @@ class TcpCapsule(EntryCapsuleBase):
 
         val_doc = collections.OrderedDict(
             [
-                ('tcp_rexmit_bytes', self._direction_key('bytes_retx')),
-                ('tcp_rexmit_pkts', self._direction_key('pkts_retx')),
+                ('tcp_rexmit_bytes', self._directional_key('bytes_retx')),
+                ('tcp_rexmit_pkts', self._directional_key('pkts_retx')),
             ]
         )
 
@@ -172,27 +168,27 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return float(self._row.get('durat'))
+        return float(self._static_key('durat'))
 
     @property
     def num_bits(self):
         """Get num_bits."""
-        return int(self._direction_key('bytes_uniq')) * 8
+        return int(self._directional_key('bytes_uniq')) * 8
 
     @property
     def num_packets(self):
         """Get num_packets."""
-        return self._direction_key('pkts_data')
+        return self._directional_key('pkts_data')
 
     @property
     def start(self):
         """Get start."""
-        return float(self._row.get('first')) / 1000
+        return float(self._static_key('first')) / 1000
 
     @property
     def end(self):
         """Get end."""
-        return float(self._row.get('last')) / 1000
+        return float(self._static_key('last')) / 1000
 
 
 class UdpCapsule(EntryCapsuleBase):
@@ -205,22 +201,22 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return float(self._direction_key('durat'))
+        return float(self._directional_key('durat'))
 
     @property
     def num_bits(self):
         """Get num_bits."""
-        return int(self._direction_key('bytes_all')) * 8
+        return int(self._directional_key('bytes_all')) * 8
 
     @property
     def num_packets(self):
         """Get num_packets."""
-        return self._direction_key('pkts_all')
+        return self._directional_key('pkts_all')
 
     @property
     def start(self):
         """Get start."""
-        return float(self._direction_key('first_abs')) / 1000
+        return float(self._directional_key('first_abs')) / 1000
 
     @property
     def end(self):
