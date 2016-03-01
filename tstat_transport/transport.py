@@ -98,6 +98,13 @@ class RabbitMQTransport(BaseTransport):
         self._exchange = self._safe_cfg_val('exchange')
         self._routing_key = self._safe_cfg_val('routing_key')
 
+        # if _options.no_transport is set, let the configuration
+        # parse and exit.
+
+        if self._options.no_transport:
+            self._log('rabbit.init', '--no-transport set, not opening connections')
+            return
+
         try:
             self._connection = PikaConnection(self._connect_info)
         except pika.exceptions.ConnectionClosed:

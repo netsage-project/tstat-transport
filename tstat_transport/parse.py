@@ -162,11 +162,7 @@ class TstatParse(TstatBase):
         super(TstatParse, self).__init__(config_capsule)
         self._tstat_dir = self._validate_path(self._options.directory)
         self._has_data = False
-        self._protocols = ['tcp', 'udp']
-        self._capsules = dict(
-            tcp=TcpLogEntryCapsule,
-            udp=UdbLogEntryCapsule,
-        )
+        self._protocols = PROTOCOLS
 
         try:
             self._transport = TRANSPORT_MAP.get(self._options.transport)(self._config)
@@ -319,6 +315,12 @@ class TstatParse(TstatBase):
 
         status = True
         err = ''
+
+        # if --no-transport set, presume message debugging/etc.
+        if self._options.no_transport:
+            self._log('_xport.run', '--no-transport set, not sending payload/dumping json')
+            print p_load
+            return status, err
 
         try:
             self._transport.set_payload(p_load)

@@ -55,7 +55,7 @@ class EntryCapsuleBase(object):
 
         doc = collections.OrderedDict(
             [
-                ('interval', '600'),  # XXX? is this right?
+                ('interval', '600'),
                 ('values', self._value_doc()),
                 ('meta', self._meta_doc()),
                 ('start', self.start),
@@ -229,7 +229,10 @@ class UdpCapsule(EntryCapsuleBase):
 
 
 def capsule_factory(row, protocol, config):
-    """Return the proper format capsule class."""
+    """Process both directions of the log row for a given protocol.
+
+    Will return a list of 0, 1 or 2 objects.
+    """
 
     capsule_map = dict(
         tcp=TcpCapsule,
@@ -242,7 +245,5 @@ def capsule_factory(row, protocol, config):
         capsule = capsule_map.get(protocol)(row, protocol, i)
         if capsule.num_bits >= config.options.bits:
             ret.append(capsule)
-            import json
-            print 'XXX', i, json.dumps(capsule.to_json_packet(), indent=4)
 
     return ret
