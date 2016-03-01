@@ -221,10 +221,6 @@ class TstatParse(TstatBase):
                 break
         return valid
 
-    def _get_capsule(self, logtype):
-        """Return the appropriate encapsulation class."""
-        return self._capsules.get(logtype)
-
     def process_output(self, root, _, files):
         """Process the logs in a single tstat output directory."""
 

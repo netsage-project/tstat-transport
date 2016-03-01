@@ -99,14 +99,14 @@ class EntryCapsuleBase(object):
         """
         Generate the meta sub-stanza.
         """
-        lookup = self._meta_map()
+        meta_vals = self._meta_map()
 
         doc = collections.OrderedDict(
             [
-                ('src_ip', lookup.get('src_ip')),
-                ('src_port', lookup.get('src_port')),
-                ('dst_ip', lookup.get('dst_ip')),
-                ('dst_port', lookup.get('dst_port')),
+                ('src_ip', meta_vals.get('src_ip')),
+                ('src_port', meta_vals.get('src_port')),
+                ('dst_ip', meta_vals.get('dst_ip')),
+                ('dst_port', meta_vals.get('dst_port')),
                 ('protocol', self._protocol),
             ]
         )
@@ -147,6 +147,23 @@ class EntryCapsuleBase(object):
 
 class TcpCapsule(EntryCapsuleBase):
     """Capsule for tcp log lines."""
+
+    def _value_doc(self):
+        """Subclass variant to add in the tcp-specific values."""
+        doc = super(TcpCapsule, self)._value_doc()
+
+        val_doc = collections.OrderedDict(
+            [
+                ('tcp_rexmit_bytes', self._direction_key('bytes_retx')),
+                ('tcp_rexmit_pkts', self._direction_key('pkts_retx')),
+            ]
+        )
+
+        for k, v in val_doc.items():
+            doc.update({k: v})
+
+        return doc
+
     @property
     def header_trim(self):
         """string to shave from keys from the csv DictReader header keys."""
