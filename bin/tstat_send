@@ -29,9 +29,9 @@ def main():
     parser.add_option('-c', '--config', metavar='FILE',
                       type='string', dest='config', default='./config.ini',
                       help='Path to the transport config file (default: %default).')
-    parser.add_option('-b', '--bytes', metavar='NUM',
-                      type='int', dest='bytes', default=25000000000,
-                      help='Threshold in bytes below which an entry will not be processed (default: %default).')  # pylint: disable=line-too-long
+    parser.add_option('-b', '--bits', metavar='NUM',
+                      type='int', dest='bits', default=1000000000,
+                      help='Threshold in bits below which an entry will not be processed (default: %default).')  # pylint: disable=line-too-long
     parser.add_option('-t', '--transport', metavar='TYPE',
                       type='string', dest='transport', default=TRANSPORT_DEFAULT,
                       help='Transport type - available: [{0}] (default: %default).'.format(' | '.join(TRANSPORT_TYPE)))  # pylint: disable=line-too-long
