@@ -33,36 +33,47 @@ class EntryCapsuleBase(object):
     def _directional_key(self, key):
         """
         Returns the proper c_ or s_ variant from the row payload depending
-        on the direction that this instance is going.
+        on the direction that this instance is going. Casts numeric strings
+        to actual numeric values.
         """
         key = '{d}{k}'.format(d=self._prefixes.get(self._direction), k=key)
-        return self._row.get(key)
+        return self._cast_to_numeric(self._row.get(key))
 
     def _static_key(self, key):
         """
         Return a "non-directional" value from the payload. Used to contrast
         against _directional_key() and to have one entry point for casting.
+        Casts numeric strings to actual numeric values.
         """
-        return self._row.get(key)
+        return self._cast_to_numeric(self._row.get(key))
 
     def _cast_to_numeric(self, val):  # pylint: disable=no-self-use
-        """Try to take the string values from the logs and cast them
+        """Take the string values from the logs and attempt to cast them
         to actual numeric types.
-
-        1 - try casting to int
-        2 - if fails, try casting to float
-        3 - if fails, return original value
         """
 
         if isinstance(val, str) or isinstance(val, unicode):
-            pass
+
+            try:
+                return int(val)
+            except ValueError:
+                pass
+
+            try:
+                return float(val)
+            except ValueError:
+                pass
+
+            return val
+        else:
+            return val
 
     def _base_document(self):
         """Generate the general structure of the object."""
 
         doc = collections.OrderedDict(
             [
-                ('interval', '600'),
+                ('interval', 600),
                 ('values', self._value_doc()),
                 ('meta', self._meta_doc()),
                 ('start', self.start),
@@ -94,13 +105,13 @@ class EntryCapsuleBase(object):
         """
         if self._direction == 'in':
             return dict(
-                src_ip=self._row.get('c_ip'), src_port=self._row.get('c_port'),
-                dst_ip=self._row.get('s_ip'), dst_port=self._row.get('s_port'),
+                src_ip=self._static_key('c_ip'), src_port=self._static_key('c_port'),
+                dst_ip=self._static_key('s_ip'), dst_port=self._static_key('s_port'),
                 )
         else:
             return dict(
-                src_ip=self._row.get('s_ip'), src_port=self._row.get('s_port'),
-                dst_ip=self._row.get('c_ip'), dst_port=self._row.get('c_port'),
+                src_ip=self._static_key('s_ip'), src_port=self._static_key('s_port'),
+                dst_ip=self._static_key('c_ip'), dst_port=self._static_key('c_port'),
                 )
 
     def _meta_doc(self):
@@ -180,12 +191,12 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return float(self._static_key('durat'))
+        return self._static_key('durat')
 
     @property
     def num_bits(self):
         """Get num_bits."""
-        return int(self._directional_key('bytes_uniq')) * 8
+        return self._directional_key('bytes_uniq') * 8
 
     @property
     def num_packets(self):
@@ -195,12 +206,12 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return float(self._static_key('first')) / 1000
+        return self._static_key('first') / 1000
 
     @property
     def end(self):
         """Get end."""
-        return float(self._static_key('last')) / 1000
+        return self._static_key('last') / 1000
 
 
 class UdpCapsule(EntryCapsuleBase):
@@ -213,12 +224,12 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return float(self._directional_key('durat'))
+        return self._directional_key('durat')
 
     @property
     def num_bits(self):
         """Get num_bits."""
-        return int(self._directional_key('bytes_all')) * 8
+        return self._directional_key('bytes_all') * 8
 
     @property
     def num_packets(self):
@@ -228,7 +239,7 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return float(self._directional_key('first_abs')) / 1000
+        return self._directional_key('first_abs') / 1000
 
     @property
     def end(self):

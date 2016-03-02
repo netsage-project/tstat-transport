@@ -6,6 +6,7 @@ import collections
 import csv
 import json
 import os
+import sys
 import warnings
 
 from .common import (
@@ -318,15 +319,15 @@ class TstatParse(TstatBase):
 
         # if --no-transport set, presume message debugging/etc.
         if self._options.no_transport:
-            self._log('_xport.run', '--no-transport set, not sending payload/dumping json')
-            print p_load
+            self._log('_xport.no_transport',
+                      '--no-transport set, not sending payload/dumping json to stdout')
+            print >> sys.stdout, p_load
             return status, err
 
         try:
             self._transport.set_payload(p_load)
             self._transport.send()
 
-            # print p_load
         except TstatTransportException as ex:
             status = False
             err = ex.value
