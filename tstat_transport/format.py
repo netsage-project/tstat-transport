@@ -60,7 +60,7 @@ class EntryCapsuleBase(object):
                 pass
 
             try:
-                return float(val)
+                return round(float(val), 3)
             except ValueError:
                 pass
 
@@ -175,6 +175,28 @@ class TcpCapsule(EntryCapsuleBase):
             [
                 ('tcp_rexmit_bytes', self._directional_key('bytes_retx')),
                 ('tcp_rexmit_pkts', self._directional_key('pkts_retx')),
+                ('tcp_rtt_avg', self._directional_key('rtt_avg')),
+                ('tcp_rtt_min', self._directional_key('rtt_min')),
+                ('tcp_rtt_max', self._directional_key('rtt_max')),
+                ('tcp_rtt_std', self._directional_key('rtt_std')),
+                ('tcp_pkts_rto', self._directional_key('pkts_rto')),
+                ('tcp_pkts_fs', self._directional_key('pkts_fs')),
+                ('tcp_pkts_reor', self._directional_key('pkts_reor')),
+                ('tcp_pkts_dup', self._directional_key('pkts_dup')),
+                ('tcp_pkts_unk', self._directional_key('pkts_unk')),
+                ('tcp_pkts_fc', self._directional_key('pkts_fc')),
+                ('tcp_pkts_unrto', self._directional_key('pkts_unrto')),
+                ('tcp_pkts_unfs', self._directional_key('pkts_unfs')),
+                ('tcp_cwin_min', self._directional_key('cwin_min')),
+                ('tcp_cwin_max', self._directional_key('cwin_max')),
+                ('tcp_out_seq_pkts', self._directional_key('pkts_ooo')),
+                ('tcp_window_scale', self._directional_key('win_scl')),
+                ('tcp_mss', self._directional_key('mss')),
+                ('tcp_max_seg_size', self._directional_key('mss_max')),
+                ('tcp_min_seg_size', self._directional_key('mss_min')),
+                ('tcp_win_max', self._directional_key('cwin_max')),
+                ('tcp_win_min', self._directional_key('cwin_min')),
+                ('tcp_initial_cwin', self._directional_key('cwin_ini')),
             ]
         )
 
@@ -206,12 +228,12 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return self._static_key('first') / 1000
+        return int(self._static_key('first') / 1000)
 
     @property
     def end(self):
         """Get end."""
-        return self._static_key('last') / 1000
+        return int(self._static_key('last') / 1000)
 
 
 class UdpCapsule(EntryCapsuleBase):
@@ -239,12 +261,12 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return self._directional_key('first_abs') / 1000
+        return int(self._directional_key('first_abs') / 1000)
 
     @property
     def end(self):
         """Get end."""
-        return self.start + self.duration
+        return int(self.start + self.duration)
 
 
 def capsule_factory(row, protocol, config):
