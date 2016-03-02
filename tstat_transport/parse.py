@@ -176,7 +176,7 @@ class TstatParse(TstatBase):
                     self._log('_process_payload.error', 'error processing slice: {0}'.format(err))
                     raise TstatParseException(err)
         else:
-            self._log('_process_payload.done', 'no playload')
+            self._log('_process_payload.done', 'no payload')
 
     def _get_json_string(self, objs):  # pylint: disable=no-self-use
         ret = [x.to_json_packet() for x in objs]
