@@ -2,7 +2,6 @@
 Classes to parse and encapsulate data from the tstat logs.
 """
 
-import collections
 import csv
 import json
 import os
@@ -20,140 +19,14 @@ from .common import (
 from .transport import TRANSPORT_MAP
 from .format import capsule_factory
 
-# These classes encapsulate and manipulate the data from the
-# tstat logs.
-
-
-class BaseLogEntryCapsule(object):
-    """Base class for the capsule classes."""
-
-    def __init__(self, values, logtype):
-        self._values = self._xform_values(values)
-        self._logtype = logtype
-
-    def _generate_range(self):
-        """override in subclasses - generate a list of the column indexes
-        that we want to extract from the logs we're reading."""
-        raise NotImplementedError
-
-    @property
-    def header_trim(self):
-        """override in subclass - string to shave from keys from the
-        csv DictReader header."""
-        raise NotImplementedError
-
-    @property
-    def ts_column(self):
-        """override in subclass - column that contains the timestamp
-        we're using for the payload."""
-        raise NotImplementedError
-
-    def _xform_values(self, valuedict):  # pylint: disable=no-self-use
-        """Transform the row values. Shave column :nn from key and return an
-        OrderedDict of the values."""
-        rng = self._generate_range()
-
-        row_values = dict()
-
-        for k in valuedict.keys():
-            label, idx = k.replace(self.header_trim, '').split(':')
-            idx = int(idx)
-            if idx in rng:
-                row_values[idx] = (label, valuedict[k])
-
-        ret = collections.OrderedDict()
-
-        for i in rng:
-            ret[row_values[i][0]] = row_values[i][1]
-
-        return ret
-
-    def to_json_packet(self):
-        """Return the payload as a json packet formatted to send to TSDS."""
-        return dict(
-            interval=600,
-            time=self.timestamp,
-            protocol=self._logtype,
-            values=self.value_dict(),
-        )
-
-    def value_dict(self):
-        """Return a xformed dict of the values."""
-        return self._values
-
-    @property
-    def timestamp(self):
-        """Get the appropriate timestamp column value and round to an int."""
-        return int(round(float(self._values.get(self.ts_column)))) / 1000
-
-    @property
-    def c_bytes_all(self):
-        """Get the c_bytes_all value as an int to the walker can see if we
-        want to add this to they payload."""
-        return int(self._values.get('c_bytes_all'))
-
-
-class TcpLogEntryCapsule(BaseLogEntryCapsule):
-    """
-    Encapsulates a line from a tstat tcp log. Returns data in a form that can
-    be sent to TSDS.
-
-    capture columns: 1-30, 45-58, and X-(X+45) where X is the offset where
-    the tcp options set starts.
-    """
-    def __init__(self, values, logtype):
-        self._offset = self._get_offset(values)
-        super(TcpLogEntryCapsule, self).__init__(values, logtype)
-
-    def _get_offset(self, vals):  # pylint: disable=no-self-use
-        """get the offset for the tcp options set values."""
-        for k in vals.keys():
-            if k.startswith('c_f1323_opt:'):
-                return int(k.split(':')[1])
-
-    def _generate_range(self):
-        return range(1, 31) + range(45, 59) + range(self._offset, self._offset+46)
-
-    @property
-    def header_trim(self):
-        """string to shave from keys from the csv DictReader header keys."""
-        return '#09#'
-
-    @property
-    def ts_column(self):
-        """column that contains the timestamp we're using for the payload."""
-        return 'first'
-
-
-class UdbLogEntryCapsule(BaseLogEntryCapsule):
-    """
-    Encapsulates a line from a tstat udp log. Returns data in a form that can
-    be sent to TSDS.
-
-    capture columns: 1-18
-    """
-    def _generate_range(self):
-        return range(1, 19)
-
-    @property
-    def header_trim(self):
-        """string to shave from keys from the csv DictReader header keys."""
-        return '#'
-
-    @property
-    def ts_column(self):
-        """column that contains the timestamp we're using for the payload."""
-        return 'c_first_abs'
-
-
-# This code is responsible for parsing the tstat logs to get the data into
-# the capsule classes and send the data off to the transport layer.
-
 
 class TstatParse(TstatBase):
     """
-    Class to handle processing the files in a TSTAT data hierarchy,
-    and format the output for sending over HTTP.
+    Process the logs in a tstat hierarchy.
+
+    Pass the parsed log entries off for formatting and filtering on transfer
+    size, then feed the results to the underlying transfer mechanism (rabbit,
+    http, etc).
     """
     LOG_PATTERN = 'log_{0}_complete'
     COMPLETED = '.processed'
