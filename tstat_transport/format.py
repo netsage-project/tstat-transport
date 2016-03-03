@@ -2,6 +2,7 @@
 Classes to format the log entries, code to access them, etc.
 
 Direction is relative to the host so - in and out from the host perspective.
+i.e.: when direction is 'in', the source is the client and dest is the dest.
 """
 
 import collections

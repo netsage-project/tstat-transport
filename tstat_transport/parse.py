@@ -126,7 +126,7 @@ class TstatParse(TstatBase):
             else:
                 self._log('process_output.run',
                           'processing: {0}'.format(self._get_log(log_path, i)))
-                # print 'processing', self._get_log(log_path, i)
+
                 with open(self._get_log(log_path, i), 'rb') as(csvfile):
                     reader = csv.DictReader(csvfile, delimiter=' ')
                     for row in reader:
@@ -146,8 +146,6 @@ class TstatParse(TstatBase):
 
             with open(self._get_state(log_path), 'w') as fh:
                 fh.write('processed')
-
-            # self._log('process_output.done', 'processed')
 
         except TstatParseException as ex:
             self._log('process_output.error', 'Payload processing failed: {0}'.format(str(ex)))
