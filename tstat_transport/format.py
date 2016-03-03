@@ -6,8 +6,24 @@ i.e.: when direction is 'in', the source is the client and dest is the dest.
 """
 
 import collections
+import warnings
 
 DIRECTIONS = ('in', 'out')
+
+
+class TstatFormatException(Exception):
+    """Custom TstatFormat exception"""
+    def __init__(self, value):
+        # pylint: disable=super-init-not-called
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class TstatFormatWarning(Warning):
+    """Custom TstatFormat warning"""
+    pass
 
 
 class EntryCapsuleBase(object):
@@ -164,6 +180,10 @@ class EntryCapsuleBase(object):
         with TsdsParse/the original rendering classes."""
         return self._base_document()
 
+    def rowdict(self):
+        """Return the payload dict."""
+        return self._row
+
 
 class TcpCapsule(EntryCapsuleBase):
     """Capsule for tcp log lines."""
@@ -285,6 +305,19 @@ def capsule_factory(row, protocol, config):
 
     for i in DIRECTIONS:
         capsule = capsule_map.get(protocol)(row, protocol, i)
+
+        try:
+            # See if we can render the whole payload to catch malformed log
+            # entries. Example: a log with a duplicate header line in it
+            # which will cause division errors etc etc etc.
+            capsule.to_json_packet()
+        except TypeError as ex:
+            msg = 'Unable to render capsule with TypeError/payload: {t} {p}'.format(
+                t=str(ex), p=capsule.rowdict())
+            warnings.warn(msg, TstatFormatWarning, stacklevel=2)
+            config.log('capsule_factory.warn', msg)
+            continue
+
         if capsule.num_bits >= config.options.bits:
             ret.append(capsule)
 
