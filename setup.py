@@ -28,6 +28,7 @@ setup(
     packages=['tstat_transport'],
     scripts=[
         'bin/tstat_send',
+        'bin/tstat_cull',
     ],
     install_requires=['pika==0.10.0'],
     classifiers=[

@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+"""
+Utility script to handle culling old/processed tstat logs and directories.
+
+Checks the mtime of the .processed statefile that is generated when a
+directory of tstat logs are successfuly processed. If it is older than
+--ttl in hours (default: 48), then the directory and the logs will be
+removed.
+"""
+
+import datetime
+from optparse import OptionParser
+import os
+import shutil
+
+from tstat_transport.util import _log
+
+
+def main():
+    """Execute the cull."""
+
+    usage = '%prog [ -f filename | -n NUM | -v ]'
+    parser = OptionParser(usage=usage)
+    parser.add_option('-d', '--directory', metavar='DIR',
+                      type='string', dest='directory',
+                      help='Root directory where tstat files are.')
+    parser.add_option('-t', '--ttl', metavar='HOURS',
+                      type='int', dest='ttl', default=48,
+                      help='Number of hours to keep processed tstat logs around for (default: %default).')  # pylint: disable=line-too-long
+    parser.add_option('-D', '--dry-run',
+                      dest='dry', action='store_true', default=False,
+                      help='Dry run - log directories to be removed but do not delete.')
+    parser.add_option('-v', '--verbose',
+                      dest='verbose', action='store_true', default=False,
+                      help='Verbose output.')
+    options, _ = parser.parse_args()
+
+    if not options.directory:
+        parser.error('Directory path is required.')
+
+    dir_path = os.path.normpath(options.directory)
+
+    if not os.path.exists(dir_path):
+        parser.error('{f} directory path does not exist'.format(f=dir_path))
+
+    processed_dirs = dict()
+
+    # generate a 'list' of candidates
+    for root, _, files in os.walk(options.directory):
+        if root.endswith('.out'):
+            if files and '.processed' in files:
+                processed_dirs[os.path.abspath(os.path.join(root, '.processed'))] = \
+                    os.path.abspath(root)
+
+    utc_now = datetime.datetime.utcnow()
+
+    for dotfile, directory in processed_dirs.items():
+        if not os.path.exists(dotfile):  # shouldn't happen
+            _log('main.error', 'state file {p} does not exist'.format(p=dotfile))
+            continue
+
+        state = datetime.datetime.utcfromtimestamp(os.stat(dotfile).st_mtime)
+        if utc_now - state >= datetime.timedelta(hours=options.ttl):
+            if options.dry:
+                _log('main.run', 'dry run, not removing {d}'.format(d=directory))
+            else:
+                _log('main.run', 'removing {d}'.format(d=directory))
+                shutil.rmtree(directory)
+
+
+if __name__ == '__main__':
+    main()
