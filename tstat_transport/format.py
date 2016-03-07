@@ -307,7 +307,7 @@ def capsule_factory(row, protocol, config):
         capsule = capsule_map.get(protocol)(row, protocol, i)
 
         try:
-            # See if we can render the whole payload to catch malformed log
+            # Render the whole payload to catch malformed log
             # entries. Example: a log with a duplicate header line in it
             # which will cause division errors etc etc etc.
             capsule.to_json_packet()
