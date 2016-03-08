@@ -91,6 +91,7 @@ class EntryCapsuleBase(object):
 
         doc = collections.OrderedDict(
             [
+                ('type', 'flow'),
                 ('interval', 600),
                 ('values', self._value_doc()),
                 ('meta', self._meta_doc()),
