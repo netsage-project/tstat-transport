@@ -1,6 +1,6 @@
 # Tstat (TCP STatistic and Analysis Tool) Transport Tools
 
-Client programs and library to read a tstat file hierarchy, parse the logs, and generate json to send to a remote archive like a RabbitMQ server.
+Client programs to read a tstat file hierarchy, parse the logs, convert them to JSON objects, and send them to a remote archive (like a RabbitMQ server). This tool was originally developed to support the [National Science Foundation NetSage Project](http://www.netsage.global/home).
 
 ## Overview
 
@@ -18,9 +18,9 @@ When invoked, it crawls a tstat file hierarchy laid out like this:
     -rw-r--r--@ root users  123801 Feb 17 14:54 log_tcp_complete
     -rw-r--r--@ root users  278301 Feb 17 14:54 log_udp_complete
 
-Selected data are extracted from the relevant logs, the data are formatted into JSON objects, and lists of JSON are sent to a remote server for archiving. All the objects from a single log are broken into a list of smaller lists (the current default is 100 objects per list). Each "sub-list" gets sent to the remote server so no one single send operation swamps the remote server.
+Selected data are extracted from the logs, formatted into JSON objects, and lists of the objects are sent to a remote server for archiving. The objects from a single set of logs log are broken into a series of smaller lists (up to 100 objects per list). Each "sub-list" gets sent to the remote server so no one single send operation swamps the remote server.
 
-When the logs in each directory have been successfully processed (all the data have been sent, delivery confirmations received, etc), a dotfile named `.processed` will be dropped in that directory. This directory will not be processed on subsequent runs, and this could be used in conjunction with a find to set up cron jobs that will cull the older logs.
+When the logs in each directory have been successfully processed (the data have been sent, delivery confirmations received, etc), a dotfile named `.processed` will be dropped in that directory. It marks that directory as processed, and the `tstat_cull` utility uses them to prune old logs.
 
 Currently, the only "transport" that is supported is sending the JSON to a RabbitMQ server, but it would be relatively straightforward to implement other transports like using HTTP to send to a REST API.
 
@@ -32,39 +32,39 @@ Currently, the only "transport" that is supported is sending the JSON to a Rabbi
 
 ##### --directory
 
-This is the path to the "root" of the directory structure where tstat writes the timestamped directories and logfiles. No default.
+Path to the "root" of the directory structure where tstat writes the timestamped directories and logfiles. No default.
 
 ##### --config
 
 Path to the .ini style config file used to pass configuration directives to the underlying transport code.
 
-Default: `./config.ini`.
+Default: `./config.ini`
 
 #### Optional
 
 ##### --bits
 
-The transfer threshold in bytes. Any transfer below this threshold below will be ignored/not archived.
+The transfer threshold in bits. Any transfer below this threshold below will be ignored.
 
-Default: `25Gb`.
+Default: `1000000000`
 
 ##### --transport
 
 Specify the underlying transport to send the JSON over. Currently, only RabbitMQ is supported.
 
-Default: `rabbit`.
+Default: `rabbit`
 
 ##### --single
 
-Only process a single "timestamped directory" of files, send JSON and exit. This is mostly useful for development or debugging.
+Process a single "timestamped directory" of files, send JSON and exit. This is primarily for development or debugging.
 
 ##### --verbose and --debug
 
-`--verbose` just outputs additional logging information built in to the code. `--debug` changes the log level to `logging.DEBUG` in the transport module. This is primarily for debugging connection problems with RabbitMQ, or get detailed output on the transactions with the remote server.
+`--verbose` triggers additional log output. `--debug` changes the log level to `logging.DEBUG` in the transport module. This is primarily for debugging connection problems with RabbitMQ, or to get detailed output on the transactions with the remote server.
 
 ## Config file
 
-tstat_send uses an .ini style config file to pass options to the underlying transport code. Doing this with command-line args would be too ponderous. Example config file:
+`tstat_send` uses an .ini style configuration file to pass options to the underlying transport code. Doing this with command-line args would be too ponderous. Example config file:
 
     [rabbit]
     # host/port are required for all transport variants
@@ -88,27 +88,25 @@ tstat_send uses an .ini style config file to pass options to the underlying tran
     [rabbit_queue_options]
 
     # This is an optional stanza. The key/value pairs
-    # will generate a dict to be passed to ssl_options
-    # connection parameters. These are the args passed
-    # to ssl.wrap_socket()
+    # will generate a dict to be passed as kwargs to ssl.wrap_socket()
     # https://docs.python.org/2/library/ssl.html#ssl.wrap_socket
     [ssl_options]
 
 * The values `host` and `port` will be required for all transport variants. If they are not supplied, a configuration error occur.
-* The rabbit transport requires the `username` and `password` config values.
+* The rabbit transport requires the `username` and `password` config values. They may also be enabled in other transport variants.
 * `vhost, queue, routing_key and exchange` should be self-explanatory RabbitMQ directives.
 * The `rabbit_queue_options` stanza is optional and can be used to pass additional kwargs to `queue_declare()` if need be. By default the code only passes the `queue` argument with the name of the queue.
 * The `ssl_options` stanza is optional too. Only necessary if additional args (paths to keyfiles, etc) need to be passed to the underlying `ssl` library.
 
 ## Message format
 
-Every log line might generate zero, one or two JSON objects. This depends on the threshold set with the `--bits` flag and what kind of transfer it is. The generated objects will be sub-divided into a list of lists of up to 100 objects. That way each send operation is of a manageable size rather than sending one huge list.
+Every log line may generate zero, one or two JSON objects. This depends on the threshold set with the `--bits` flag and what kind of transfer it is. The generated objects will be sub-divided into a series of lists of up to 100 objects each. That way, each send operation is of a manageable size rather than sending one huge list.
 
-All numeric values are being converted to "actual" numeric types, all floating point values are being rounded to three decimal places to avoid small values being rendered in scientific notation, and the timestamps (reported in ms) are being `int(value / 1000)` to convert to epoch seconds.
+All numeric values are being converted to "actual" numeric types. All floating point values are being rounded to three decimal places to avoid small values being rendered in scientific notation. Timestamps logged in floating point ms are being converted to integer epoch seconds.
 
 ### UDP logs
 
-This is the most basic format.
+This is the most basic/common format.
 
     {
         "interval": 600,
@@ -130,7 +128,7 @@ This is the most basic format.
 
 ### TCP logs
 
-The TCP logs are identical, but have additional values in cluded in the `values` stanza:
+The TCP logs are identical, but have additional values in the `values` stanza:
 
     {
         "interval": 600,
@@ -178,7 +176,9 @@ The TCP logs are identical, but have additional values in cluded in the `values`
 
 ### tstat_cull
 
-Crawls a tstat directory to cull old processed logs from disk.  It checks the `mtime` of the `.processed` state file that is generated when a directory of logs is successfully processed. If `mtime` is older than the default time to live in hours (default: 48), the directory and logs are removed.
+Crawls a tstat directory to cull processed logs from disk.  Tstat can generate a lot of output, this cleans up processed files, while leaving a configurable "buffer" of time to keep processed logs. The default is too keep 2 days worth of processed logs on disk, rather than deleting them right after they have been processed.
+
+This script checks the `mtime` of the `.processed` state file in a directory of processed logs. If it is older than the `--ttl` time to live in hours (default: 48), the directory and logs are removed.
 
 #### Required args
 
@@ -190,12 +190,14 @@ This is the path to the "root" of the directory structure where tstat writes the
 
 ##### --ttl
 
-The time to live value in hours.  Set this if you don't want to use the default of 48 hours.
+The time to live in hours.  Set this if you don't want to use the default of 48 hours.
 
 ##### --dry-run
 
 Do a dry run. Just log the directories that will be deleted but don't delete them.
 
 ## Extending tstat_send with additional transports
+
+Adding additional transports is fairly straightforward.
 
 See doc/extending.md in the source distribution.

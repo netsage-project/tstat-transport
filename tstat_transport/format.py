@@ -86,7 +86,8 @@ class EntryCapsuleBase(object):
             return val
 
     def _base_document(self):
-        """Generate the general structure of the object."""
+        """Generate the 'outer' structure of the object. Calls other
+        methods to generate sub-documents."""
 
         doc = collections.OrderedDict(
             [

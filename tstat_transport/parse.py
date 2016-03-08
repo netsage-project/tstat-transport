@@ -83,7 +83,8 @@ class TstatParse(TstatBase):
 
     def _check_row(self, rowdict):  # pylint: disable=no-self-use
         """Make sure that the csv DictReader returned a valid row.
-        Some logs have a bogus last line."""
+        Some logs have a bogus last line. If any of the values are
+        None, the entire row is considered non-valid."""
         valid = True
         for v in rowdict.values():
             if v is None:
@@ -98,7 +99,7 @@ class TstatParse(TstatBase):
         if not root.endswith('.out'):
             return
 
-        # does it potentailly contain any logs?
+        # does it contain any logs?
         logs_found = False
 
         for i in self._protocols:

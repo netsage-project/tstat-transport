@@ -19,14 +19,7 @@ TRANSPORT_DEFAULT = 'rabbit'
 
 
 class BaseTransport(TstatBase):
-    """Base class for the transport-specific classes.
-
-    The PORT attribute should be overridden in the subclasses
-    and set to the default port number for the transport protocol
-    in question (ie: 80 for http, 5672 for rabbit, etc).  Port will
-    be able to be changed to a non-standard port with a command
-    line flag.
-    """
+    """Base class for the transport-specific classes."""
 
     def __init__(self, config_capsule, init_user_pass=False):
         super(BaseTransport, self).__init__(config_capsule)

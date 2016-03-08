@@ -1,5 +1,5 @@
 """
-Custom exceptions for tstat_trasport package.
+Custom superclasses, exceptions and common code for tstat_trasport package.
 """
 
 import ConfigParser
@@ -34,7 +34,7 @@ class TstatBase(object):  # pylint: disable=too-few-public-methods
             self._log(event, msg)
 
     def _debug_log(self, event, msg):
-        """Log events if running in verbose mode."""
+        """Log events if running in debug mode."""
         if self._options.debug:
             self._log(event, msg)
 
