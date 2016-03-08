@@ -53,6 +53,7 @@ def main():
                 processed_dirs[os.path.abspath(os.path.join(root, '.processed'))] = \
                     os.path.abspath(root)
 
+    # see if any of the state files exceed ttl
     utc_now = datetime.datetime.utcnow()
 
     for dotfile, directory in processed_dirs.items():

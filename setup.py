@@ -19,12 +19,12 @@ def read(*paths):
 
 setup(
     name='tstat_transport',
-    version='0.1',
+    version='0.4',
     description='Tools to send Tstat (TCP STatistic and Analysis Tool) log data to archive servers.',  # pylint: disable=line-too-long
     long_description=(read('README.md')),
     author='Monte M. Goode',
     author_email='MMGoode@lbl.gov',
-    url='http://software.es.net/esmond/',
+    url='https://github.com/esnet/tstat-transport',
     packages=['tstat_transport'],
     scripts=[
         'bin/tstat_send',
