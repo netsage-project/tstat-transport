@@ -4,24 +4,24 @@
 Setup file for tstat_transport distribution.
 """
 
-import os
 import sys
 from setuptools import setup
 
+try:
+    # Use pandoc to convert .md -> .rst when uploading to pypi
+    import pypandoc
+    DESCRIPTION = pypandoc.convert('README.md', 'rst')
+except (IOError, ImportError, OSError):
+    DESCRIPTION = open('README.md').read()
+
 if sys.version_info[0] == 2 and sys.version_info[1] < 7:
     sys.exit('Sorry, Python < 2.7 is not supported')
-
-
-def read(*paths):
-    """Build a file path from *paths* and return the contents."""
-    with open(os.path.join(*paths), 'r') as fh:
-        return fh.read()
 
 setup(
     name='tstat_transport',
     version='0.4',
     description='Tools to send Tstat (TCP STatistic and Analysis Tool) log data to archive servers.',  # pylint: disable=line-too-long
-    long_description=(read('README.md')),
+    long_description=DESCRIPTION,
     author='Monte M. Goode',
     author_email='MMGoode@lbl.gov',
     url='https://github.com/esnet/tstat-transport',
