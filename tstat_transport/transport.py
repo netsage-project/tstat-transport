@@ -82,17 +82,18 @@ class RabbitMQTransport(BaseTransport):
     def __init__(self, config_capsule):
         super(RabbitMQTransport, self).__init__(config_capsule, init_user_pass=True)
 
+        # Retrieve config values before setting everything up to
+        # allow any configuration errors to be raised first.
+
         self._use_ssl = self._safe_cfg_val('use_ssl', as_bool=True)
         self._connect_info = self._connection_params()
 
-        # Retrieve these values before setting everything up to
-        # allow any configuration errors to be raised first.
         self._queue = self._safe_cfg_val('queue')
         self._exchange = self._safe_cfg_val('exchange')
         self._routing_key = self._safe_cfg_val('routing_key')
 
         # if _options.no_transport is set, let the configuration
-        # parse and exit.
+        # validate and exit.
 
         if self._options.no_transport:
             self._log('rabbit.init', '--no-transport set, not opening connections')
@@ -113,12 +114,12 @@ class RabbitMQTransport(BaseTransport):
         self._log('rabbit.init.connection', 'status - is_open: {0}'.format(
             self._connection.is_open))
 
-        # now set up the channel
+        # set up the channel
         self._channel = self._connection.channel()
-        # just set the queue, presume other opts set on server.
+        # just set the queue, presume opts set on server.
         self._channel.queue_declare(
             queue=self._queue, **self._config.get_rabbit_queue_opts())
-        # we want message delivery confirmation
+        # enable message delivery confirmation
         self._channel.confirm_delivery()
 
     def _connection_params(self):
