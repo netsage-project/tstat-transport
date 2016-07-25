@@ -19,7 +19,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 7:
 
 setup(
     name='tstat_transport',
-    version='0.4.4',
+    version='0.4.6',
     description='Tools to send Tstat (TCP STatistic and Analysis Tool) log data to archive servers.',  # pylint: disable=line-too-long
     long_description=DESCRIPTION,
     author='Monte M. Goode',

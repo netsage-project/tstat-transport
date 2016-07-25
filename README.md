@@ -60,6 +60,10 @@ Default: `rabbit`
 
 Process a single "timestamped directory" of files, send JSON and exit. This is primarily for development or debugging.
 
+##### --no-transport
+
+Skips sending the messages to the selected transport and dumps them to standard out instead. Use standard shell redirection `... --no-transport > file.json` to save output to a file.
+
 ##### --verbose and --debug
 
 `--verbose` triggers additional log output. `--debug` changes the log level to `logging.DEBUG` in the transport module. This is primarily for debugging connection problems with RabbitMQ, or to get detailed output on the transactions with the remote server.
