@@ -22,7 +22,7 @@ Selected data are extracted from the logs, formatted into JSON objects, and list
 
 When the logs in each directory have been successfully processed (the data have been sent, delivery confirmations received, etc), a dotfile named `.processed` will be dropped in that directory. That marks that directory as processed, and those logs will be ignored on subsequent runs. The `tstat_cull` utility similarly uses the .processed dotfiles to prune old logs.
 
-It is not a persistent process and would be run periodically from cron (for example) to periodically process a log on a "live" machine.
+It is not a persistent process and would be run periodically from cron (for example) to periodically process logs on a "live" machine.
 
 Currently, the only "transport" that is supported is sending the JSON to a RabbitMQ server, but it would be relatively straightforward to implement other transports like using HTTP to send to a REST API.
 
