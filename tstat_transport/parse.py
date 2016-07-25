@@ -142,7 +142,6 @@ class TstatParse(TstatBase):
                             self._log('process_output.warn',
                                       'bad row in {0}: {1}'.format(self._get_log(log_path, i), row))
                             self.warn('bad row in {0}: {1}'.format(self._get_log(log_path, i), row))
-                            sys.exit()
                             continue
                         # looks good
                         payload += capsule_factory(row, i, self._config)
