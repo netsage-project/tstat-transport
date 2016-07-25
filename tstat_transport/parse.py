@@ -84,10 +84,16 @@ class TstatParse(TstatBase):
     def _check_row(self, rowdict):  # pylint: disable=no-self-use
         """Make sure that the csv DictReader returned a valid row.
         Some logs have a bogus last line. If any of the values are
-        None, the entire row is considered non-valid."""
+        None, the entire row is considered non-valid.
+
+        Similarly, check the keys for None values as well. If a log line
+        is malformed - like if it is too long due to some kind of
+        append error - the DictReader will generate a key of None.
+        That will also mark the line as non-valid.
+        """
         valid = True
-        for v in rowdict.values():
-            if v is None:
+        for k, v in rowdict.items():
+            if k is None or v is None:
                 valid = False
                 break
         return valid
@@ -136,6 +142,7 @@ class TstatParse(TstatBase):
                             self._log('process_output.warn',
                                       'bad row in {0}: {1}'.format(self._get_log(log_path, i), row))
                             self.warn('bad row in {0}: {1}'.format(self._get_log(log_path, i), row))
+                            sys.exit()
                             continue
                         # looks good
                         payload += capsule_factory(row, i, self._config)
