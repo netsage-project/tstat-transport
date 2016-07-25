@@ -20,7 +20,9 @@ When invoked, it crawls a tstat file hierarchy laid out like this:
 
 Selected data are extracted from the logs, formatted into JSON objects, and lists of the objects are sent to a remote server for archiving. The objects from a single set of logs log are broken into a series of smaller lists (up to 100 objects per list). Each "sub-list" gets sent to the remote server so no one single send operation swamps the remote server.
 
-When the logs in each directory have been successfully processed (the data have been sent, delivery confirmations received, etc), a dotfile named `.processed` will be dropped in that directory. It marks that directory as processed, and the `tstat_cull` utility uses them to prune old logs.
+When the logs in each directory have been successfully processed (the data have been sent, delivery confirmations received, etc), a dotfile named `.processed` will be dropped in that directory. That marks that directory as processed, and those logs will be ignored on subsequent runs. The `tstat_cull` utility similarly uses the .processed dotfiles to prune old logs.
+
+It is not a persistent process and would be run periodically from cron (for example) to periodically process a log on a "live" machine.
 
 Currently, the only "transport" that is supported is sending the JSON to a RabbitMQ server, but it would be relatively straightforward to implement other transports like using HTTP to send to a REST API.
 
