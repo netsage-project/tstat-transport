@@ -56,6 +56,10 @@ Specify the underlying transport to send the JSON over. Currently, only RabbitMQ
 
 Default: `rabbit`
 
+##### --sensor
+
+The sensor_id element of the message metadata defaults to `socket.gethostname()` - using this flag will set that value manually.
+
 ##### --single
 
 Process a single "timestamped directory" of files, send JSON and exit. This is primarily for development or debugging.
