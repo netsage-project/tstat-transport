@@ -236,7 +236,7 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return self._static_key('durat')
+        return round(self._static_key('durat') / 1000, 2)
 
     @property
     def num_bits(self):
@@ -269,7 +269,7 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def duration(self):
         """get duration."""
-        return self._directional_key('durat')
+        return round(self._directional_key('durat') / 1000, 2)
 
     @property
     def num_bits(self):
