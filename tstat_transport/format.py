@@ -44,9 +44,32 @@ class EntryCapsuleBase(object):
 
     def _sanitize_row(self, row):
         """Remove any jank from the log headers so we have a dict with
-        'pure' key names stripped of garbage and the :nn index part."""
+        'pure' key names stripped of garbage and the :nn index part.
+
+        The headers start and look like this:
+
+        #15#c_ip:1 c_port:2 c_pkts_all:3
+
+        If this finds a # character in one of the header keys, it
+        shaves everything before the right-most # character off. It is
+        presumed that this will impact the first c_ip:1 column but I
+        don't want to hard code that.
+
+        Then a split is done on ':' to produce a "pure" key.
+
+        Note that this also modifies the original dict produced by
+        csv.DictReader.
+        """
+
         for k in row.keys():
-            row[k.replace(self.header_trim, '').split(':')[0]] = row.pop(k)
+
+            if k.rfind('#') > -1:
+                key = k[k.rfind('#') + 1:]
+            else:
+                key = k
+
+            row[key.split(':')[0]] = row.pop(k)
+
         return row
 
     def _directional_key(self, key):
@@ -239,11 +262,6 @@ class TcpCapsule(EntryCapsuleBase):
         return doc
 
     @property
-    def header_trim(self):
-        """string to shave from keys from the csv DictReader header keys."""
-        return '#09#'
-
-    @property
     def duration(self):
         """get duration."""
         return round(self._static_key('durat') / 1000, 2)
@@ -271,10 +289,6 @@ class TcpCapsule(EntryCapsuleBase):
 
 class UdpCapsule(EntryCapsuleBase):
     """Capsule for udp log lines."""
-    @property
-    def header_trim(self):
-        """string to shave from keys from the csv DictReader header keys."""
-        return '#'
 
     @property
     def duration(self):
