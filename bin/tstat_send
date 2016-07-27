@@ -35,6 +35,9 @@ def main():
     parser.add_option('-t', '--transport', metavar='TYPE',
                       type='string', dest='transport', default=TRANSPORT_DEFAULT,
                       help='Transport type - available: [{0}] (default: %default).'.format(' | '.join(TRANSPORT_TYPE)))  # pylint: disable=line-too-long
+    parser.add_option('-S', '--sensor', metavar='ID',
+                      type='string', dest='sensor', default=None,
+                      help='Sensor ID to include in meta data (default: gethostbyname()).')
     parser.add_option('-s', '--single',
                       dest='single', action='store_true', default=False,
                       help='Only process a single log file - primarily for development.')

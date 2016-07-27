@@ -28,11 +28,12 @@ class TstatFormatWarning(Warning):
 
 class EntryCapsuleBase(object):
     """Base for the format capsule classes."""
-    def __init__(self, row, protocol, direction):
+    def __init__(self, row, protocol, direction, config):
         self._row = self._sanitize_row(row)
         self._protocol = protocol
         self._direction = direction
         self._prefixes = {'in': 'c_', 'out': 's_'}
+        self._config = config
 
     @property
     def header_trim(self):
@@ -126,12 +127,12 @@ class EntryCapsuleBase(object):
             return dict(
                 src_ip=self._static_key('c_ip'), src_port=self._static_key('c_port'),
                 dst_ip=self._static_key('s_ip'), dst_port=self._static_key('s_port'),
-                )
+            )
         else:
             return dict(
                 src_ip=self._static_key('s_ip'), src_port=self._static_key('s_port'),
                 dst_ip=self._static_key('c_ip'), dst_port=self._static_key('c_port'),
-                )
+            )
 
     def _meta_doc(self):
         """
@@ -146,6 +147,7 @@ class EntryCapsuleBase(object):
                 ('dst_ip', meta_vals.get('dst_ip')),
                 ('dst_port', meta_vals.get('dst_port')),
                 ('protocol', self._protocol),
+                ('sensor_id', self.sensor_id),
             ]
         )
 
@@ -176,6 +178,13 @@ class EntryCapsuleBase(object):
     def end(self):
         """override in subclass - get start."""
         raise NotImplementedError
+
+    @property
+    def sensor_id(self):
+        if self._config.options.sensor is not None:
+            return self._config.options.sensor
+        else:
+            return 'XXX: TBA'
 
     def to_json_packet(self):
         """Public wrapper around document method. Primarily for compatability
@@ -306,7 +315,7 @@ def capsule_factory(row, protocol, config):
     ret = list()
 
     for i in DIRECTIONS:
-        capsule = capsule_map.get(protocol)(row, protocol, i)
+        capsule = capsule_map.get(protocol)(row, protocol, i, config)
 
         try:
             # Render the whole payload to catch malformed log
