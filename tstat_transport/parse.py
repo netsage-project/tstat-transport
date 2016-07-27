@@ -162,7 +162,7 @@ class TstatParse(TstatBase):
     def _slice_payload(self, payload):
         """Generate a list of smaller lists to keep the writes to the remote
         message queue sane."""
-        return [payload[x:x+self.SLICE_SIZE] for x in range(0, len(payload), self.SLICE_SIZE)]  # pylint: disable=line-too-long
+        return [payload[x:x + self.SLICE_SIZE] for x in range(0, len(payload), self.SLICE_SIZE)]  # pylint: disable=line-too-long
 
     def _process_payload(self, payload):
         """Ship the payload off in appropriately sized blasts."""

@@ -6,6 +6,7 @@ i.e.: when direction is 'in', the source is the client and dest is the dest.
 """
 
 import collections
+import socket
 import warnings
 
 DIRECTIONS = ('in', 'out')
@@ -184,7 +185,7 @@ class EntryCapsuleBase(object):
         if self._config.options.sensor is not None:
             return self._config.options.sensor
         else:
-            return 'XXX: TBA'
+            return socket.gethostname()
 
     def to_json_packet(self):
         """Public wrapper around document method. Primarily for compatability
