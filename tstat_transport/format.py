@@ -172,6 +172,7 @@ class EntryCapsuleBase(object):
                 ('dst_port', meta_vals.get('dst_port')),
                 ('protocol', self._protocol),
                 ('sensor_id', self.sensor_id),
+                ('flow_type', 'tstat'),
             ]
         )
 
