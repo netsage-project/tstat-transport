@@ -134,7 +134,7 @@ class RabbitMQTransport(BaseTransport):
             credentials=credentials,
             ssl=self._use_ssl,
             ssl_options=self._config.get_ssl_opts(),
-            )
+        )
 
         self._verbose_log('_connection_params.end', params)
 
