@@ -137,6 +137,8 @@ class EntryCapsuleBase(object):
                 ('duration', self.duration),
                 ('num_bits', self.num_bits),
                 ('num_packets', self.num_packets),
+                ('bits_per_second', self.bits_per_second),
+                ('packets_per_second', self.packets_per_second)
             ]
         )
 
@@ -273,9 +275,19 @@ class TcpCapsule(EntryCapsuleBase):
         return self._directional_key('bytes_uniq') * 8
 
     @property
+    def bits_per_second(self):
+        """Get bits_per_second."""
+        return ( round( ( self._directional_key('bytes_uniq') * 8 ) / ( self._static_key('durat') / 1000 ), 2) ) if self._static_key('durat') != 0 else 0
+
+    @property
     def num_packets(self):
         """Get num_packets."""
         return self._directional_key('pkts_data')
+
+    @property
+    def packets_per_second(self):
+        """Get packets_per_second."""
+        return ( round( self._directional_key('pkts_data') / ( self._static_key('durat') / 1000 ), 2) ) if  self._static_key('durat') != 0 else 0
 
     @property
     def start(self):
@@ -302,9 +314,19 @@ class UdpCapsule(EntryCapsuleBase):
         return self._directional_key('bytes_all') * 8
 
     @property
+    def bits_per_second(self):
+        """Get bits_per_second."""
+        return ( round( ( self._directional_key('bytes_all') * 8 ) / ( self._directional_key('durat') / 1000 ), 2) ) if self._directional_key('durat') != 0 else 0
+
+    @property
     def num_packets(self):
         """Get num_packets."""
         return self._directional_key('pkts_all')
+
+    @property
+    def packets_per_second(self):
+        """Get packets_per_second."""
+        return ( round( self._directional_key('pkts_all') / ( self._directional_key('durat') / 1000 ), 2) ) if  self._directional_key('durat') != 0 else 0
 
     @property
     def start(self):
