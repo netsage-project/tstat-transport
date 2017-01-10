@@ -44,11 +44,11 @@ Default: `./config.ini`
 
 #### Optional
 
-##### --bits
+##### --threshold
 
-The transfer threshold in bits. Any transfer below this threshold below will be ignored.
+The transfer threshold in megabytes. Any transfer below this threshold below will be ignored.
 
-Default: `1000000000`
+Default: `1000`
 
 ##### --transport
 
