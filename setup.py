@@ -17,9 +17,12 @@ except (IOError, ImportError, OSError):
 if sys.version_info[0] == 2 and sys.version_info[1] < 7:
     sys.exit('Sorry, Python < 2.7 is not supported')
 
+if sys.version_info[0] == 3 and sys.version_info[1] < 3:
+    sys.exit('Sorry, Python 3 < 3.3 is not supported')
+
 setup(
     name='tstat_transport',
-    version='0.5.2',
+    version='0.6.0',
     description='Tools to send Tstat (TCP STatistic and Analysis Tool) log data to archive servers.',  # pylint: disable=line-too-long
     long_description=DESCRIPTION,
     author='Monte M. Goode',
@@ -30,15 +33,20 @@ setup(
         'bin/tstat_send',
         'bin/tstat_cull',
     ],
-    install_requires=['pika==0.10.0'],
+    install_requires=[
+        'pika==0.10.0',
+        'configparser==3.5.0',
+        'six',
+    ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Telecommunications Industry',
         'Environment :: Console',
         'License :: OSI Approved :: BSD License',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet',
         'Topic :: System :: Networking',
         'Topic :: Software Development :: Libraries',

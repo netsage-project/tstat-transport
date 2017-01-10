@@ -2,7 +2,7 @@
 Custom superclasses, exceptions and common code for tstat_trasport package.
 """
 
-import ConfigParser
+from configparser import ConfigParser
 
 from .util import valid_hostname
 
@@ -64,7 +64,7 @@ class ConfigurationCapsule(object):
     def __init__(self, options, log, config_path):
         self._options = options
         self._log = log
-        self._config = ConfigParser.ConfigParser()
+        self._config = ConfigParser()
         self._config.read(config_path)
 
         self._validate_config(config_path)

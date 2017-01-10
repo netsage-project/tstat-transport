@@ -1,6 +1,7 @@
 """
 Classes to parse and encapsulate data from the tstat logs.
 """
+from __future__ import print_function
 
 import csv
 import json
@@ -92,7 +93,7 @@ class TstatParse(TstatBase):
         That will also mark the line as non-valid.
         """
         valid = True
-        for k, v in rowdict.items():
+        for k, v in list(rowdict.items()):
             if k is None or v is None:
                 valid = False
                 break
@@ -134,7 +135,7 @@ class TstatParse(TstatBase):
                 self._log('process_output.run',
                           'processing: {0}'.format(self._get_log(log_path, i)))
 
-                with open(self._get_log(log_path, i), 'rb') as(csvfile):
+                with open(self._get_log(log_path, i), 'r') as(csvfile):
                     reader = csv.DictReader(csvfile, delimiter=' ')
                     for row in reader:
                         # validate the row before we proceed
@@ -199,7 +200,7 @@ class TstatParse(TstatBase):
         if self._options.no_transport:
             self._log('_xport.no_transport',
                       '--no-transport set, not sending payload/dumping json to stdout')
-            print >> sys.stdout, p_load
+            print(p_load, file=sys.stdout)
             return status, err
 
         try:

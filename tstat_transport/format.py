@@ -9,11 +9,14 @@ import collections
 import socket
 import warnings
 
+import six
+
 DIRECTIONS = ('in', 'out')
 
 
 class TstatFormatException(Exception):
     """Custom TstatFormat exception"""
+
     def __init__(self, value):
         # pylint: disable=super-init-not-called
         self.value = value
@@ -29,6 +32,7 @@ class TstatFormatWarning(Warning):
 
 class EntryCapsuleBase(object):
     """Base for the format capsule classes."""
+
     def __init__(self, row, protocol, direction, config):
         self._row = self._sanitize_row(row)
         self._protocol = protocol
@@ -61,7 +65,7 @@ class EntryCapsuleBase(object):
         csv.DictReader.
         """
 
-        for k in row.keys():
+        for k in list(row.keys()):
 
             if k.rfind('#') > -1:
                 key = k[k.rfind('#') + 1:]
@@ -94,7 +98,7 @@ class EntryCapsuleBase(object):
         to actual numeric types.
         """
 
-        if isinstance(val, str) or isinstance(val, unicode):
+        if isinstance(val, six.string_types):
 
             try:
                 return int(val)
@@ -256,10 +260,11 @@ class TcpCapsule(EntryCapsuleBase):
                 ('tcp_win_max', self._directional_key('cwin_max')),
                 ('tcp_win_min', self._directional_key('cwin_min')),
                 ('tcp_initial_cwin', self._directional_key('cwin_ini')),
+                ('tcp_sack_cnt', self._directional_key('sack_cnt')),
             ]
         )
 
-        for k, v in val_doc.items():
+        for k, v in list(val_doc.items()):
             doc.update({k: v})
 
         return doc
@@ -277,7 +282,7 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def bits_per_second(self):
         """Get bits_per_second."""
-        return ( round( ( self._directional_key('bytes_uniq') * 8 ) / ( self._static_key('durat') / 1000 ), 2) ) if self._static_key('durat') != 0 else 0
+        return (round((self._directional_key('bytes_uniq') * 8) / (self._static_key('durat') / 1000), 2)) if self._static_key('durat') != 0 else 0
 
     @property
     def num_packets(self):
@@ -287,7 +292,7 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def packets_per_second(self):
         """Get packets_per_second."""
-        return ( round( self._directional_key('pkts_data') / ( self._static_key('durat') / 1000 ), 2) ) if  self._static_key('durat') != 0 else 0
+        return (round(self._directional_key('pkts_data') / (self._static_key('durat') / 1000), 2)) if self._static_key('durat') != 0 else 0
 
     @property
     def start(self):
@@ -316,7 +321,7 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def bits_per_second(self):
         """Get bits_per_second."""
-        return ( round( ( self._directional_key('bytes_all') * 8 ) / ( self._directional_key('durat') / 1000 ), 2) ) if self._directional_key('durat') != 0 else 0
+        return (round((self._directional_key('bytes_all') * 8) / (self._directional_key('durat') / 1000), 2)) if self._directional_key('durat') != 0 else 0
 
     @property
     def num_packets(self):
@@ -326,7 +331,7 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def packets_per_second(self):
         """Get packets_per_second."""
-        return ( round( self._directional_key('pkts_all') / ( self._directional_key('durat') / 1000 ), 2) ) if  self._directional_key('durat') != 0 else 0
+        return (round(self._directional_key('pkts_all') / (self._directional_key('durat') / 1000), 2)) if self._directional_key('durat') != 0 else 0
 
     @property
     def start(self):
@@ -367,7 +372,7 @@ def capsule_factory(row, protocol, config):
             config.log('capsule_factory.warn', msg)
             continue
 
-        if capsule.num_bits >= config.options.bits:
+        if capsule.num_bits >= (config.options.threshold * 8000000):  # MB -> bits
             ret.append(capsule)
 
     return ret

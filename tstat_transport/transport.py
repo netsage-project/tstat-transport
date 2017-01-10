@@ -170,4 +170,4 @@ TRANSPORT_MAP = dict(
     rabbit=RabbitMQTransport,
 )
 
-TRANSPORT_TYPE = [x for x in TRANSPORT_MAP.keys()]
+TRANSPORT_TYPE = [x for x in list(TRANSPORT_MAP.keys())]
