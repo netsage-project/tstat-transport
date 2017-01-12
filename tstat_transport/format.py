@@ -254,7 +254,7 @@ class TcpCapsule(EntryCapsuleBase):
                 ('tcp_cwin_max', self._directional_key('cwin_max')),
                 ('tcp_out_seq_pkts', self._directional_key('pkts_ooo')),
                 ('tcp_window_scale', self._directional_key('win_scl')),
-                ('tcp_mss', self._directional_key('mss')),
+                ('tcp_mss', self.tcp_mss),
                 ('tcp_max_seg_size', self._directional_key('mss_max')),
                 ('tcp_min_seg_size', self._directional_key('mss_min')),
                 ('tcp_win_max', self._directional_key('cwin_max')),
@@ -303,6 +303,15 @@ class TcpCapsule(EntryCapsuleBase):
     def end(self):
         """Get end."""
         return int(self._static_key('last') / 1000)
+
+    @property
+    def tcp_mss(self):
+        """get the correct mss from the c_ and s_ values"""
+
+        c_mss = self._static_key('c_mss')
+        s_mss = self._static_key('s_mss')
+
+        return c_mss if c_mss < s_mss else s_mss
 
 
 class UdpCapsule(EntryCapsuleBase):
