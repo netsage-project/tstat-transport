@@ -260,7 +260,7 @@ class TcpCapsule(EntryCapsuleBase):
                 ('tcp_win_max', self._directional_key('cwin_max')),
                 ('tcp_win_min', self._directional_key('cwin_min')),
                 ('tcp_initial_cwin', self._directional_key('cwin_ini')),
-                ('tcp_sack_cnt', self._directional_key('sack_cnt')),
+                ('tcp_sack_cnt', self.sack_cnt),
             ]
         )
 
@@ -312,6 +312,15 @@ class TcpCapsule(EntryCapsuleBase):
         s_mss = self._static_key('s_mss')
 
         return c_mss if c_mss < s_mss else s_mss
+
+    @property
+    def sack_cnt(self):
+        """get the correct mss from the c_ and s_ values"""
+
+        c_sack_cnt = self._static_key('c_sack_cnt')
+        s_sack_cnt = self._static_key('s_sack_cnt')
+
+        return c_sack_cnt if c_sack_cnt > s_sack_cnt else s_sack_cnt
 
 
 class UdpCapsule(EntryCapsuleBase):
