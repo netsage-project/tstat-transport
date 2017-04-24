@@ -35,7 +35,7 @@ setup(
     ],
     install_requires=[
         'pika==0.10.0',
-        'configparser>=3.5.0',
+        'configparser==3.5.0b2',
         'six',
     ],
     classifiers=[
