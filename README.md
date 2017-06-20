@@ -60,6 +60,10 @@ Default: `rabbit`
 
 The sensor_id element of the message metadata defaults to `socket.gethostname()` - using this flag will set that value manually.
 
+##### --instance
+
+The instance_id element of the message metadata defaults to 0 - using this flag will set that value manually. This makes it possible to differentiate between instances on sensors that have multiple tstat streams.
+
 ##### --single
 
 Process a single "timestamped directory" of files, send JSON and exit. This is primarily for development or debugging.
