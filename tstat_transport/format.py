@@ -178,6 +178,7 @@ class EntryCapsuleBase(object):
                 ('dst_port', meta_vals.get('dst_port')),
                 ('protocol', self._protocol),
                 ('sensor_id', self.sensor_id),
+                ('instance_id', self.instance_id),
                 ('flow_type', 'tstat'),
             ]
         )
@@ -216,6 +217,13 @@ class EntryCapsuleBase(object):
             return self._config.options.sensor
         else:
             return socket.gethostname()
+
+    @property
+    def instance_id(self):
+        if self._config.options.instance is not None:
+            return self._config.options.instance
+        else:
+            return 0
 
     def to_json_packet(self):
         """Public wrapper around document method. Primarily for compatability

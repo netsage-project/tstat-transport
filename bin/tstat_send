@@ -38,6 +38,9 @@ def main():
     parser.add_option('-S', '--sensor', metavar='ID',
                       type='string', dest='sensor', default=None,
                       help='Sensor ID to include in meta data (default: gethostbyname()).')
+    parser.add_option('-I', '--instance', metavar='ID',
+                      type='string', dest='instance', default=0,
+                      help='Instance ID to include in meta data (default: 0). Mostly useful if there are multiple TSTAT processes on one sensor.')
     parser.add_option('-s', '--single',
                       dest='single', action='store_true', default=False,
                       help='Only process a single log file - primarily for development.')
