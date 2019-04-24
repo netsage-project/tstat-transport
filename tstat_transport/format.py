@@ -241,11 +241,18 @@ class TcpCapsule(EntryCapsuleBase):
     def _value_doc(self):
         """Subclass variant to add in the tcp-specific values."""
         doc = super(TcpCapsule, self)._value_doc()
-
+        
+        #Calculate retransmit rate if we have both num_packets and restransmits
+        tcp_rexmit_pkts = self._directional_key('pkts_retx')
+        tcp_rexmit_rate = 0
+        if self.num_packets and tcp_rexmit_pkts:
+            tcp_rexmit_rate = float(tcp_rexmit_pkts)/self.num_packets
+        
         val_doc = collections.OrderedDict(
             [
                 ('tcp_rexmit_bytes', self._directional_key('bytes_retx')),
-                ('tcp_rexmit_pkts', self._directional_key('pkts_retx')),
+                ('tcp_rexmit_pkts', tcp_rexmit_pkts),
+                ('tcp_rexmit_rate', tcp_rexmit_rate),
                 ('tcp_rtt_avg', self._directional_key('rtt_avg')),
                 ('tcp_rtt_min', self._directional_key('rtt_min')),
                 ('tcp_rtt_max', self._directional_key('rtt_max')),
