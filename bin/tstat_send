@@ -27,8 +27,7 @@ from tstat_transport.common import (
 def main():
     """Execute the walk."""
 
-    parser = argparse.ArgumentParser(description='%prog [ -d DIR | -v ]',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--directory', metavar='DIR',
                         type=str, dest='directory', required=True,
                         help='Root directory where tstat files are.')
