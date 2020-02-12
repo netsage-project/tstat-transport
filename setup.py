@@ -6,6 +6,8 @@ Setup file for tstat_transport distribution.
 
 import sys
 from setuptools import setup
+import os
+
 
 try:
     # Use pandoc to convert .md -> .rst when uploading to pypi
@@ -20,6 +22,14 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 6:
 if sys.version_info[0] == 3 and sys.version_info[1] < 3:
     sys.exit('Sorry, Python 3 < 3.3 is not supported')
 
+
+# use requirements.txt to define dependencies
+def get_required():
+    with open('requirements.txt') as f:
+        required = f.read().splitlines()
+    return required
+
+
 setup(
     name='tstat_transport',
     version='0.6.6',
@@ -33,11 +43,7 @@ setup(
         'bin/tstat_send',
         'bin/tstat_cull',
     ],
-    install_requires=[
-        'pika==0.10.0',
-        'configparser==3.5.0b2',
-        'six',
-    ],
+    install_requires=get_required(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
