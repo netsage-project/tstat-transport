@@ -4,7 +4,7 @@
 Utility script to handle culling old/processed tstat logs and directories.
 
 Checks the mtime of the .processed statefile that is generated when a
-directory of tstat logs are successfuly processed. If it is older than
+directory of tstat logs are successfully processed. If it is older than
 --ttl in hours (default: 48), then the directory and the logs will be
 removed.
 """
