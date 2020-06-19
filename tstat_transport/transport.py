@@ -127,14 +127,21 @@ class RabbitMQTransport(BaseTransport):
 
         credentials = pika.PlainCredentials(self._username, self._password)
 
-        params = pika.ConnectionParameters(
-            host=self._host,
-            port=self._port,
-            virtual_host=self._safe_cfg_val('vhost'),
-            credentials=credentials,
-            ssl=self._use_ssl,
-            ssl_options=self._config.get_ssl_opts(),
-        )
+        if self._use_ssl:
+            params = pika.ConnectionParameters(
+                host=self._host,
+                port=self._port,
+                virtual_host=self._safe_cfg_val('vhost'),
+                credentials=credentials,
+                ssl=self._use_ssl,
+                ssl_options=self._config.get_ssl_opts()
+                )
+        else:
+            params = pika.ConnectionParameters(
+                host=self._host,
+                port=self._port,
+                virtual_host=self._safe_cfg_val('vhost'),
+                credentials=credentials)
 
         self._verbose_log('_connection_params.end', params)
 

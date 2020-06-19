@@ -1,8 +1,9 @@
 """
 Custom superclasses, exceptions and common code for tstat_trasport package.
 """
-
-from configparser import ConfigParser
+import configparser
+import os
+from configparser import ConfigParser, SafeConfigParser
 
 from .util import valid_hostname
 
@@ -53,6 +54,24 @@ class TstatConfigWarning(Warning):
     """Custom TstatConfig warning"""
     pass
 
+class EnvInterpolation(configparser.BasicInterpolation):
+    """Interpolation which expands environment variables in values."""
+
+    def before_get(self, parser, section, option, value, defaults):
+        if value is None or value[:2] != '${' or len(value) < 4:
+            return value
+        trimmed_value = value[2:]
+        trimmed_value = trimmed_value[:len(trimmed_value)-1]
+        elements = trimmed_value.split(':')
+        if len(elements) > 1:
+            default = elements[1]
+        else:
+            default = value
+        env_value = os.path.expandvars('$' + elements[0])
+        if env_value == ('$' + elements[0]):
+            return default
+        else:
+            return env_value
 
 class ConfigurationCapsule(object):
     """
@@ -64,8 +83,11 @@ class ConfigurationCapsule(object):
     def __init__(self, options, log, config_path):
         self._options = options
         self._log = log
-        self._config = ConfigParser()
+        self._config = SafeConfigParser(interpolation=EnvInterpolation())
         self._config.read(config_path)
+        # Print active configuration if verbose mode
+        if options.verbose:
+            self._print_current_config()
 
         self._validate_config(config_path)
 
@@ -121,6 +143,12 @@ class ConfigurationCapsule(object):
         except ValueError:
             msg = '{0} config value improper type'.format(value)
             raise TstatConfigException(msg)
+
+    def _print_current_config(self):
+        for each_section in self._config.sections():
+            print("[{section}]".format(section=each_section))
+            for (each_key, each_val) in self._config.items(each_section):
+                print("{key}={value}".format(key=each_key, value=each_val))
 
     def _config_stanza_to_dict(self, stanza):
         opts = dict()

@@ -1,3 +1,8 @@
 *.egg-info
 *.pyc
 dist/
+.idea
+config.ini
+data
+.env
+build
