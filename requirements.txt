@@ -1,5 +1,5 @@
 configparser>=4.0,<4.1
-pika==1.1.0
+pika==0.10.0
 six>=1.14,<1.15
 python-dotenv==0.13.0
 environ-config==20.1.0
