@@ -136,7 +136,7 @@ class TstatParse(TstatBase):
                           'processing: {0}'.format(self._get_log(log_path, i)))
 
                 with open(self._get_log(log_path, i), 'r') as(csvfile):
-                    reader = csv.DictReader(csvfile, delimiter=' ')
+                    reader = csv.DictReader(csvfile, delimiter=' ', quoting=csv.QUOTE_NONE)
                     for row in reader:
                         # validate the row before we proceed
                         if not self._check_row(row):

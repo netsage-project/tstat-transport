@@ -11,7 +11,7 @@ import argparse
 
 ## Fixes the PYTHONPATH
 import sys
-sys.path.append('../tstat-transport')
+sys.path.append('..')
 
 
 from tstat_transport.parse import TstatParse
