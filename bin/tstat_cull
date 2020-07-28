@@ -25,9 +25,7 @@ from tstat_transport.util import _log
 def main():
     """Execute the cull."""
 
-    usage = '%prog [ -f filename | -n NUM | -v ]'
-    parser = argparse.ArgumentParser(description=usage,
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--directory', metavar='DIR',
                       type=str, dest='directory', required=True,
                       help='Root directory where tstat files are.')

@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+   tstat:         
+       image: netsage/tstat:3.0.1
+       build:
+          context: .
+          dockerfile: compose/tstat/Dockerfile
+       network_mode: host
+       container_name: tstat
+       volumes:
+           - ./data/tstat:/tmp/data 
+       env_file: .env
+       privileged: true
+       restart: unless-stopped
+   transport:         
+       image: netsage/tstat_transport:latest
+       build:
+          context: .
+          dockerfile: compose/tstat-transport/Dockerfile
+       command: /code/tstat_send -c /code/config/config.ini -d /data/tstat -v
+       #command: sleep 9999999
+       depends_on: 
+         - rabbit
+       volumes:
+           - ./data/config:/code/config/
+           - ./data/tstat:/data/tstat/
+       env_file: .env
+   rabbit:
+        image: rabbitmq:3-management
+        env_file: .env
