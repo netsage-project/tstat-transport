@@ -38,7 +38,7 @@ def main():
     parser.add_argument('-v', '--verbose',
                       dest='verbose', action='store_true', default=False,
                       help='Verbose output.')
-    options, _ = parser.parse_args()
+    options = parser.parse_args()
 
     dir_path = os.path.normpath(options.directory)
 
