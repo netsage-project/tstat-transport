@@ -11,8 +11,8 @@ import argparse
 
 ## Fixes the PYTHONPATH
 import sys
-sys.path.append('..')
 
+sys.path.append('..')
 
 from tstat_transport.parse import TstatParse
 from tstat_transport.util import GracefulInterruptHandler, _log
