@@ -48,47 +48,25 @@ class GracefulInterruptHandler(object):  # pylint: disable=too-few-public-method
         return True
 
 
-def setup_log(log_path=None, use_loguru=False):
+def setup_log(log_path=None):
     """
     Usage:
     _log('main.start', 'happy simple log event')
     _log('launch', 'more={0}, complex={1} log=event'.format(100, 200))
     """
     # pylint: disable=redefined-variable-type
-    try:
-        if use_loguru:
-            from loguru import logger
-            logger.add('{0}/tstat_transport.log'.format(log_path))
-            use_loguru = True
-            return logger
-    except:
-        use_loguru = False
-
-    logger = logging.getLogger("tstat_transport")
-    if not log_path:
-        handle = logging.StreamHandler()
-    else:
-        # it's on you to make sure log_path is valid.
-        logfile = '{0}/tstat_transport.log'.format(log_path)
-        handle = logging.FileHandler(logfile)
-    handle.setFormatter(logging.Formatter('ts=%(asctime)s %(message)s'))
-    logger.addHandler(handle)
-    logger.setLevel(logging.INFO)
+    from loguru import logger
+    if log_path is not None:
+        logger.add('{0}/tstat_transport.log'.format(log_path))
+    logger.level("INFO")
     return logger
 
 
-log = setup_log(use_loguru=False)  # pylint: disable=invalid-name
-
-
-def legacy(event, msg):
-    log.info('event=%s id=%s %s' % (event, int(time.time()), msg))
+log = setup_log()  # pylint: disable=invalid-name
 
 
 def _log(event, msg, modern=False):
-    if modern:
-        log.info(msg)
-    else:
-        legacy(event, msg)
+    log.info(msg)
 
 
 def valid_hostname(hostname):

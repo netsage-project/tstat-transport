@@ -13,12 +13,12 @@ services:
     privileged: true
     restart: unless-stopped
   transport:
+    container_name: send
     image: netsage/tstat_transport:latest
     build:
       context: .
       dockerfile: compose/tstat-transport/Dockerfile
-    command: /code/tstat_send -c /code/config/config.ini -d /data/tstat -v -S sensorName -I instance
-    #command: sleep 9999999
+    command: /code/bin/tstat_send -c /code/config/config.ini -d /data/tstat -v -S sensorName -I instance -T 0
     depends_on:
       - rabbit
     volumes:

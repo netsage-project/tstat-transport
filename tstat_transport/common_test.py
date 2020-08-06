@@ -6,9 +6,17 @@ import argparse
 
 from tstat_transport.util import  _log
 
-CONFIG='../test_config.ini'
+CONFIG='test_data/test_config.ini'
 
 class TestConfigurationMethods(unittest.TestCase):
+
+    # Note expects $RABBIT_HOST to be set
+    def test_config_env_load(self):
+        ns = argparse.Namespace(verbose=False, transport='rabbit')
+        config_capsule = ConfigurationCapsule(ns, _log, 'test_data/test_env_config.ini')
+        ## check int
+        value = config_capsule.get_cfg_val('host')
+        self.assertEqual(value, 'google.com')
 
     def test_config_load(self):
         ns = argparse.Namespace(verbose=False, transport='rabbit')
@@ -17,10 +25,10 @@ class TestConfigurationMethods(unittest.TestCase):
         self.assertEqual(value, 'netsage_tstat')
         ## check int
         value = config_capsule.get_cfg_val('port', as_int=True)
-        self.assertEqual(value, 5671)
+        self.assertEqual(value, 5672)
         ## check bool
         value = config_capsule.get_cfg_val('use_ssl', as_bool=True)
-        self.assertEqual(value, True)
+        self.assertEqual(value, False)
 
     def test_rabbit_opts(self):
         ns = argparse.Namespace(verbose=False, transport='rabbit')
@@ -34,7 +42,7 @@ class TestConfigurationMethods(unittest.TestCase):
         config_capsule = ConfigurationCapsule(ns, _log, CONFIG)
         ssl = config_capsule.get_ssl_opts()
         self.assertTrue('server_side' in ssl)
-        self.assertEqual(ssl.get('server_side'), 'True')
+        self.assertEqual(ssl.get('server_side'), '')
 
 
 if __name__ == '__main__':

@@ -73,6 +73,14 @@ class BaseTransport(TstatBase):
         warnings.warn(msg, TstatTransportWarning, stacklevel=2)
 
 
+class StdoutTransport(BaseTransport):
+    def __init__(self, config_capsule):
+        super(StdoutTransport, self).__init__(config_capsule, init_user_pass=True)
+
+    def send(self):
+        print(self._payload)
+
+
 class RabbitMQTransport(BaseTransport):
     """
     Class to send JSON payload to a RabbitMQ server.
@@ -186,6 +194,7 @@ class RabbitMQTransport(BaseTransport):
 
 TRANSPORT_MAP = dict(
     rabbit=RabbitMQTransport,
+    stdout=StdoutTransport,
 )
 
 TRANSPORT_TYPE = [x for x in list(TRANSPORT_MAP.keys())]

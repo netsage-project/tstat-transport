@@ -5,7 +5,7 @@ import configparser
 import os
 from configparser import ConfigParser
 
-from .util import valid_hostname
+from .util import valid_hostname, log
 
 PROTOCOLS = ('tcp', 'udp')
 
@@ -146,9 +146,9 @@ class ConfigurationCapsule(object):
 
     def _print_current_config(self):
         for each_section in self._config.sections():
-            print("[{section}]".format(section=each_section))
+            log.info("[{section}]".format(section=each_section))
             for (each_key, each_val) in self._config.items(each_section):
-                print("{key}={value}".format(key=each_key, value=each_val))
+                log.info("{key}={value}".format(key=each_key, value=each_val))
 
     def _config_stanza_to_dict(self, stanza):
         opts = dict()
@@ -185,7 +185,6 @@ class ConfigurationCapsule(object):
     @property
     def config(self):
         return self._config
-
 
 class TstatParseException(Exception):
     """Custom TstatParse exception"""

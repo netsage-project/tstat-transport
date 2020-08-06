@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """
@@ -12,7 +12,7 @@ import argparse
 ## Fixes the PYTHONPATH
 import sys
 
-sys.path.append('..')
+sys.path.append('../tstat_transport/')
 
 from tstat_transport.parse import TstatParse
 from tstat_transport.util import GracefulInterruptHandler, _log
@@ -47,6 +47,8 @@ def main():
                         type=str, dest='instance', default=0,
                         help='Instance ID to include in meta data. Mostly useful if there are multiple '
                              'TSTAT processes on one sensor.')
+    parser.add_argument('--print', dest='print', default=False,
+                        action='store_true', required=False, help='Print parsed configuration prior to execution')
     parser.add_argument('-s', '--single',
                         dest='single', action='store_true', default=False,
                         help='Only process a single log file - primarily for development.')
@@ -67,6 +69,9 @@ def main():
         parser.error('{f} directory path does not exist'.format(f=dir_path))
 
     config_path = os.path.abspath(options.config)
+    if options.print:
+        config_capsule = ConfigurationCapsule(options, _log, config_path)
+        config_capsule._print_current_config()
 
     if not os.path.exists(config_path):
         parser.error('{f} config file does not exist'.format(f=config_path))

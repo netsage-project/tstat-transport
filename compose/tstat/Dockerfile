@@ -9,12 +9,12 @@ RUN  \
 
 WORKDIR /tmp
 RUN   yum install -y libpcap-devel.x86_64 libpcap.x86_64 && \
-      wget http://tstat.polito.it/download/tstat-3.0.1.tar.gz  && \
-     tar xvfz tstat-3.0.1.tar.gz && \
-     cd tstat-3.0 && \
-     ./autogen.sh && \
-     ./configure && \
-     make && make install 
+    wget http://tstat.polito.it/download/tstat-3.0.1.tar.gz  && \
+    tar xvfz tstat-3.0.1.tar.gz && \
+    cd tstat-3.0 && \
+    ./autogen.sh && \
+    ./configure && \
+    make && make install 
 
 VOLUME /tmp/data 
 
