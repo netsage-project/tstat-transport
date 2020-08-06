@@ -1,0 +1,1 @@
+#c_ip:1 c_port:2 c_first_abs:3 c_durat:4 c_bytes_all:5 c_pkts_all:6 c_isint:7 c_iscrypto:8 c_type:9 s_ip:10 s_port:11 s_first_abs:12 s_durat:13 s_bytes_all:14 s_pkts_all:15 s_isint:16 s_iscrypto:17 s_type:18 fqdn:19

@@ -14,6 +14,7 @@ class GracefulInterruptHandler(object):  # pylint: disable=too-few-public-method
 
     snippet courtesy of gist: https://gist.github.com/nonZero/2907502
     """
+
     # pylint: disable=attribute-defined-outside-init, unused-argument,
     # pylint: disable=missing-docstring, invalid-name, redefined-builtin
     def __init__(self, sig=signal.SIGINT):
@@ -47,13 +48,22 @@ class GracefulInterruptHandler(object):  # pylint: disable=too-few-public-method
         return True
 
 
-def setup_log(log_path=None):
+def setup_log(log_path=None, use_loguru=False):
     """
     Usage:
     _log('main.start', 'happy simple log event')
     _log('launch', 'more={0}, complex={1} log=event'.format(100, 200))
     """
     # pylint: disable=redefined-variable-type
+    try:
+        if use_loguru:
+            from loguru import logger
+            logger.add('{0}/tstat_transport.log'.format(log_path))
+            use_loguru = True
+            return logger
+    except:
+        use_loguru = False
+
     logger = logging.getLogger("tstat_transport")
     if not log_path:
         handle = logging.StreamHandler()
@@ -66,11 +76,19 @@ def setup_log(log_path=None):
     logger.setLevel(logging.INFO)
     return logger
 
-log = setup_log()  # pylint: disable=invalid-name
+
+log = setup_log(use_loguru=False)  # pylint: disable=invalid-name
 
 
-def _log(event, msg):
-    log.info('event=%s id=%s %s', event, int(time.time()), msg)
+def legacy(event, msg):
+    log.info('event=%s id=%s %s' % (event, int(time.time()), msg))
+
+
+def _log(event, msg, modern=False):
+    if modern:
+        log.info(msg)
+    else:
+        legacy(event, msg)
 
 
 def valid_hostname(hostname):
