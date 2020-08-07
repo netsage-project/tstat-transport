@@ -7,3 +7,4 @@ data
 .env
 build
 .history
+scripts/out

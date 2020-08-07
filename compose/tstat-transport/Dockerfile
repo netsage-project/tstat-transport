@@ -21,4 +21,4 @@ VOLUME /code/config
 ## TStat data location
 VOLUME /data/tstat
 
-CMD ["/code/tstat_send", "-c", "/code/config/config.ini", "-d", "/data/tstat", "-v", "-S", "sensorName", "-I", "InstanceName", "-T", "1" ]
+CMD ["/code/tstat_send", "-c", "/code/config/config.ini", "-d", "/data/tstat", "-v", "-S", "sensorName", "-I", "InstanceName", "-T", "0" ]
