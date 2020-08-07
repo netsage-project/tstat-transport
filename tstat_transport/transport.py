@@ -6,9 +6,9 @@ import logging
 import warnings
 import ssl
 
+from .util import log
 import pika
 from pika.adapters.blocking_connection import BlockingConnection as PikaConnection
-
 from .common import (
     TstatBase,
     TstatConfigException,
@@ -73,14 +73,6 @@ class BaseTransport(TstatBase):
         warnings.warn(msg, TstatTransportWarning, stacklevel=2)
 
 
-class StdoutTransport(BaseTransport):
-    def __init__(self, config_capsule):
-        super(StdoutTransport, self).__init__(config_capsule, init_user_pass=True)
-
-    def send(self):
-        print(self._payload)
-
-
 class RabbitMQTransport(BaseTransport):
     """
     Class to send JSON payload to a RabbitMQ server.
@@ -141,7 +133,7 @@ class RabbitMQTransport(BaseTransport):
             config_options = self._config.get_ssl_opts()
             options = ssl.SSLContext()
             if config_options is not None:
-                options = ssl.SSLContext(**config_options)
+                options = ssl.wrap_socket(**config_options)
 
             ssl_options = pika.SSLOptions(options, self._host)
             params = pika.ConnectionParameters(
@@ -149,7 +141,6 @@ class RabbitMQTransport(BaseTransport):
                     port=self._port,
                     virtual_host=self._safe_cfg_val('vhost'),
                     credentials=credentials,
-                    heartbeat=self._safe_cfg_val('heartbeat', as_int=True),
                     ssl_options=ssl_options
                 )
         else:
@@ -157,7 +148,6 @@ class RabbitMQTransport(BaseTransport):
                 host=self._host,
                 port=self._port,
                 virtual_host=self._safe_cfg_val('vhost'),
-                heartbeat=self._safe_cfg_val('heartbeat', as_int=True),
                 credentials=credentials)
 
         self._verbose_log('_connection_params.end', params)
@@ -193,8 +183,7 @@ class RabbitMQTransport(BaseTransport):
 
 
 TRANSPORT_MAP = dict(
-    rabbit=RabbitMQTransport,
-    stdout=StdoutTransport,
+    rabbit=RabbitMQTransport
 )
 
 TRANSPORT_TYPE = [x for x in list(TRANSPORT_MAP.keys())]

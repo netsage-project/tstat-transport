@@ -32,7 +32,7 @@ def get_required():
 
 setup(
     name='tstat_transport',
-    version='0.6.7',
+    version='0.6.8',
     description='Tools to send Tstat (TCP STatistic and Analysis Tool) log data to archive servers.',  # pylint: disable=line-too-long
     long_description=DESCRIPTION,
     author='Monte M. Goode',
