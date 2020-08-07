@@ -3,9 +3,9 @@ Custom superclasses, exceptions and common code for tstat_trasport package.
 """
 import configparser
 import os
-from configparser import ConfigParser, SafeConfigParser
+from configparser import ConfigParser
 
-from .util import valid_hostname
+from .util import valid_hostname, log
 
 PROTOCOLS = ('tcp', 'udp')
 
@@ -83,7 +83,7 @@ class ConfigurationCapsule(object):
     def __init__(self, options, log, config_path):
         self._options = options
         self._log = log
-        self._config = SafeConfigParser(interpolation=EnvInterpolation())
+        self._config = ConfigParser(interpolation=EnvInterpolation())
         self._config.read(config_path)
         # Print active configuration if verbose mode
         if options.verbose:
@@ -146,9 +146,9 @@ class ConfigurationCapsule(object):
 
     def _print_current_config(self):
         for each_section in self._config.sections():
-            print("[{section}]".format(section=each_section))
+            log.info("[{section}]".format(section=each_section))
             for (each_key, each_val) in self._config.items(each_section):
-                print("{key}={value}".format(key=each_key, value=each_val))
+                log.info("{key}={value}".format(key=each_key, value=each_val))
 
     def _config_stanza_to_dict(self, stanza):
         opts = dict()
@@ -162,6 +162,8 @@ class ConfigurationCapsule(object):
         return opts
 
     def get_ssl_opts(self):
+        if len(self._config_stanza_to_dict('ssl_options')) == 0:
+            return None
         return self._config_stanza_to_dict('ssl_options')
 
     # Some rabbit specific option calls to pass addional kwargs to
@@ -183,7 +185,6 @@ class ConfigurationCapsule(object):
     @property
     def config(self):
         return self._config
-
 
 class TstatParseException(Exception):
     """Custom TstatParse exception"""

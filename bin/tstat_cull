@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Utility script to handle culling old/processed tstat logs and directories.
@@ -16,8 +16,8 @@ import shutil
 
 ## Fixes the PYTHONPATH
 import sys
-sys.path.append('../tstat-transport')
 
+sys.path.append('../tstat-transport')
 
 from tstat_transport.util import _log
 
@@ -27,17 +27,17 @@ def main():
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--directory', metavar='DIR',
-                      type=str, dest='directory', required=True,
-                      help='Root directory where tstat files are.')
+                        type=str, dest='directory', required=True,
+                        help='Root directory where tstat files are.')
     parser.add_argument('-t', '--ttl', metavar='HOURS',
-                      type=int, dest='ttl', default=48,
-                      help='Number of hours to keep processed tstat logs around for.')  # pylint: disable=line-too-long
+                        type=int, dest='ttl', default=48,
+                        help='Number of hours to keep processed tstat logs around for.')  # pylint: disable=line-too-long
     parser.add_argument('-D', '--dry-run',
-                      dest='dry', action='store_true', default=False,
-                      help='Dry run - log directories to be removed but do not delete.')
+                        dest='dry', action='store_true', default=False,
+                        help='Dry run - log directories to be removed but do not delete.')
     parser.add_argument('-v', '--verbose',
-                      dest='verbose', action='store_true', default=False,
-                      help='Verbose output.')
+                        dest='verbose', action='store_true', default=False,
+                        help='Verbose output.')
     options = parser.parse_args()
 
     dir_path = os.path.normpath(options.directory)

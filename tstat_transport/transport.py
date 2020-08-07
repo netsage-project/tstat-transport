@@ -4,10 +4,11 @@ Classes to handle the sending of the json-formatted by the appropriate transport
 
 import logging
 import warnings
+import ssl
 
+from .util import log
 import pika
 from pika.adapters.blocking_connection import BlockingConnection as PikaConnection
-
 from .common import (
     TstatBase,
     TstatConfigException,
@@ -79,6 +80,7 @@ class RabbitMQTransport(BaseTransport):
     If connection requires special ssl_options, these can be set in the
     optional [ssl_options] stanza in the configuration file.
     """
+
     def __init__(self, config_capsule):
         super(RabbitMQTransport, self).__init__(config_capsule, init_user_pass=True)
 
@@ -128,13 +130,18 @@ class RabbitMQTransport(BaseTransport):
         credentials = pika.PlainCredentials(self._username, self._password)
 
         if self._use_ssl:
+            config_options = self._config.get_ssl_opts()
+            options = ssl.SSLContext()
+            if config_options is not None:
+                options = ssl.wrap_socket(**config_options)
+
+            ssl_options = pika.SSLOptions(options, self._host)
             params = pika.ConnectionParameters(
-                host=self._host,
-                port=self._port,
-                virtual_host=self._safe_cfg_val('vhost'),
-                credentials=credentials,
-                ssl=self._use_ssl,
-                ssl_options=self._config.get_ssl_opts()
+                    host=self._host,
+                    port=self._port,
+                    virtual_host=self._safe_cfg_val('vhost'),
+                    credentials=credentials,
+                    ssl_options=ssl_options
                 )
         else:
             params = pika.ConnectionParameters(
@@ -153,17 +160,19 @@ class RabbitMQTransport(BaseTransport):
         self._verbose_log('rabbit.send', 'publishing message')
 
         if self._connection.is_open:
-            if self._channel.basic_publish(
+            try:
+                self._channel.basic_publish(
                     exchange=self._exchange,
                     routing_key=self._routing_key,
                     body=self._payload,
                     properties=pika.BasicProperties(
                         content_type='application/json',
                         delivery_mode=1,
-                    )
-            ):
+                    ),
+                mandatory=True
+                )
                 self._log('rabbit.send', 'basic_publish success')
-            else:
+            except:
                 msg = 'could not confirm publish success'
                 self._log('rabbit.send.error', msg)
                 raise TstatTransportException(msg)
@@ -174,7 +183,7 @@ class RabbitMQTransport(BaseTransport):
 
 
 TRANSPORT_MAP = dict(
-    rabbit=RabbitMQTransport,
+    rabbit=RabbitMQTransport
 )
 
 TRANSPORT_TYPE = [x for x in list(TRANSPORT_MAP.keys())]

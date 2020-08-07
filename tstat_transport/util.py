@@ -14,6 +14,7 @@ class GracefulInterruptHandler(object):  # pylint: disable=too-few-public-method
 
     snippet courtesy of gist: https://gist.github.com/nonZero/2907502
     """
+
     # pylint: disable=attribute-defined-outside-init, unused-argument,
     # pylint: disable=missing-docstring, invalid-name, redefined-builtin
     def __init__(self, sig=signal.SIGINT):
@@ -54,23 +55,18 @@ def setup_log(log_path=None):
     _log('launch', 'more={0}, complex={1} log=event'.format(100, 200))
     """
     # pylint: disable=redefined-variable-type
-    logger = logging.getLogger("tstat_transport")
-    if not log_path:
-        handle = logging.StreamHandler()
-    else:
-        # it's on you to make sure log_path is valid.
-        logfile = '{0}/tstat_transport.log'.format(log_path)
-        handle = logging.FileHandler(logfile)
-    handle.setFormatter(logging.Formatter('ts=%(asctime)s %(message)s'))
-    logger.addHandler(handle)
-    logger.setLevel(logging.INFO)
+    from loguru import logger
+    if log_path is not None:
+        logger.add('{0}/tstat_transport.log'.format(log_path))
+    logger.level("INFO")
     return logger
+
 
 log = setup_log()  # pylint: disable=invalid-name
 
 
-def _log(event, msg):
-    log.info('event=%s id=%s %s', event, int(time.time()), msg)
+def _log(event, msg, modern=False):
+    log.info(msg)
 
 
 def valid_hostname(hostname):

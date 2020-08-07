@@ -1,0 +1,1 @@
+#c_ip:1 c_port:2 c_bytes_uniq:3 c_pkts_all:4 c_msn:5 c_msn_a:6 c_msn_d:7 c_msn_n:8 c_msn_u:9 c_msn_y:10 s_ip:11 s_port:12 s_bytes_uniq:13 s_pkts_all:14 s_msn:15 s_msn_a:16 s_msn_d:17 s_msn_n:18 s_msn_u:19 s_msn_y:20 first_tm:21 durat:22 type:23 ver:24 c_isint:25 flowid:26 T:27 con_t:28 c_iscrypto:29 s_iscrypto:30

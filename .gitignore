@@ -6,3 +6,5 @@ config.ini
 data
 .env
 build
+.history
+scripts/out

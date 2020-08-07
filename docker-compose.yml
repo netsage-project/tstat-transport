@@ -1,30 +1,37 @@
-version: '3.7'
+version: "3.7"
 services:
-   tstat:         
-       image: netsage/tstat:3.0.1
-       build:
-          context: .
-          dockerfile: compose/tstat/Dockerfile
-       network_mode: host
-       container_name: tstat
-       volumes:
-           - ./data/tstat:/tmp/data 
-       env_file: .env
-       privileged: true
-       restart: unless-stopped
-   transport:         
-       image: netsage/tstat_transport:latest
-       build:
-          context: .
-          dockerfile: compose/tstat-transport/Dockerfile
-       command: /code/tstat_send -c /code/config/config.ini -d /data/tstat -v
-       #command: sleep 9999999
-       depends_on: 
-         - rabbit
-       volumes:
-           - ./data/config:/code/config/
-           - ./data/tstat:/data/tstat/
-       env_file: .env
-   rabbit:
-        image: rabbitmq:3-management
-        env_file: .env
+  tstat:
+    image: netsage/tstat:3.0.1
+    build:
+      context: .
+      dockerfile: compose/tstat/Dockerfile
+    network_mode: host
+    container_name: tstat
+    volumes:
+      - ./data/tstat:/tmp/data
+    env_file: .env
+    privileged: true
+    restart: unless-stopped
+  transport:
+    container_name: send
+    image: netsage/tstat_transport:latest
+    build:
+      context: .
+      dockerfile: compose/tstat-transport/Dockerfile
+    command: /code/bin/tstat_send -c /code/config/config.ini -d /data/tstat -v -S sensorName -I instance -T 0
+    depends_on:
+      - rabbit
+    volumes:
+      - ./data/config:/code/config/
+      - ./data/tstat:/data/tstat/
+    env_file: .env
+  rabbit:
+    image: rabbitmq:3-management
+    env_file: .env
+    ports:
+      - "15672:15672" # MGMT HTTP
+      - "15671:15671" # MGMT HTTP
+      - "5671:5671" ##TLS
+      - "5672:5672" #No cipher
+    volumes:
+      - ./ssl:/tmp/ssl

@@ -253,6 +253,7 @@ class TcpCapsule(EntryCapsuleBase):
                 ('tcp_rexmit_bytes', self._directional_key('bytes_retx')),
                 ('tcp_rexmit_pkts', tcp_rexmit_pkts),
                 ('tcp_rexmit_rate', tcp_rexmit_rate),
+                ('tcp_syn_cnt', self._directional_key('syn_cnt')),
                 ('tcp_rtt_avg', self._directional_key('rtt_avg')),
                 ('tcp_rtt_min', self._directional_key('rtt_min')),
                 ('tcp_rtt_max', self._directional_key('rtt_max')),
