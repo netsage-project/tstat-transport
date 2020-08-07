@@ -17,6 +17,13 @@ function publish_image() {
 }
 
 function integration_test() {
+    if [[ -z ${TRAVIS_TAG} ]]; then
+        echo "Tag is not set, skipping"
+    else
+        echo "Updating configuration to select tag"
+        ./scripts/docker_select_version.sh ${TRAVIS_TAG}
+    fi
+
     cp env.example .env
     docker-compose build transport
     docker-compose up -d rabbit
@@ -25,7 +32,7 @@ function integration_test() {
 
     if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         docker images
-        #publish_image
+        publish_image
     fi
 }
 
