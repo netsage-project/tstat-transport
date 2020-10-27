@@ -313,12 +313,12 @@ class TcpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return int(self._static_key('first') / 1000)
+        return int(self._static_key('first'))
 
     @property
     def end(self):
         """Get end."""
-        return int(self._static_key('last') / 1000)
+        return int(self._static_key('last'))
 
     @property
     def tcp_mss(self):
@@ -370,12 +370,12 @@ class UdpCapsule(EntryCapsuleBase):
     @property
     def start(self):
         """Get start."""
-        return int(self._directional_key('first_abs') / 1000)
+        return int(self._directional_key('first_abs'))
 
     @property
     def end(self):
         """Get end."""
-        return int(self.start + self.duration)
+        return int(self._directional_key('first_abs')) + int(self._directional_key('durat'))
 
 
 def capsule_factory(row, protocol, config):
